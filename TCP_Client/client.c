@@ -54,6 +54,99 @@ int receive_line(int sockfd, char *buf, size_t bufsz) {
     return (int)strlen(buf);
 }
 
+int do_login(int sock) {
+    char username[512], password[512], out[MAX_LINE], response[MAX_LINE];
+    
+    printf("Enter username: ");
+    if (!fgets(username, sizeof(username), stdin)) return -1;
+    printf("Enter password: ");
+    if (!fgets(password, sizeof(password), stdin)) return -1;
+
+    /* trim trailing CR/LF from stdin */
+    trim_CRLF(username);
+    trim_CRLF(password);
+    
+    if (strlen(username) == 0 || strlen(password) == 0) {
+        printf("Username and password cannot be empty\n");
+        return -1;
+    }
+    
+    int n = snprintf(out, sizeof(out), "LOGIN %s %s\r\n", username ,password); // format the message to send to server
+    if (n < 0 || (size_t)n >= sizeof(out)) {
+        fprintf(stderr, "Input too long.\n");
+        return -1;
+    }
+    
+    if (send(sock, out, (size_t)n, 0) <= 0) {
+        perror("send");
+        return -1;
+    }
+    
+    if (receive_line(sock, response, sizeof(response)) <= 0) {
+        fprintf(stderr, "Server closed\n");
+        return -1;
+    }
+    
+    printf("Server send: %s\n", response);
+    return (atoi(response) == 110 );
+}
+
+void do_register(int sock){
+    char username[512], password[512], out[MAX_LINE], response[MAX_LINE];
+    
+    printf("Enter username to register: ");
+    if (!fgets(username, sizeof(username), stdin)) return;
+    printf("Enter password to register: ");
+    if (!fgets(password, sizeof(password), stdin)) return;
+
+    /* trim trailing CR/LF from stdin */
+    trim_CRLF(username);
+    trim_CRLF(password);
+    
+    if (strlen(username) == 0 || strlen(password) == 0) {
+        printf("Username and password cannot be empty\n");
+        return;
+    }
+    
+    int n = snprintf(out, sizeof(out), "REGISTER %s %s\r\n", username ,password); // format the message to send to server
+    if (n < 0 || (size_t)n >= sizeof(out)) {
+        fprintf(stderr, "Input too long.\n");
+        return;
+    }
+    
+    if (send(sock, out, (size_t)n, 0) <= 0) {
+        perror("send");
+        return;
+    }
+    
+    if (receive_line(sock, response, sizeof(response)) <= 0) {
+        fprintf(stderr, "Server closed\n");
+        return;
+    }
+    
+    printf("Server send: %s\n", response);
+    return;
+}
+
+int do_logout(int sock) {
+    char line[MAX_LINE];
+    const char *out = "LOGOUT\r\n"; // format the message to send to server
+    
+    if (send(sock, out, strlen(out), 0) <= 0) {
+        perror("send");
+        return -1;
+    }
+    
+    if (receive_line(sock, line, sizeof(line)) <= 0) {
+        fprintf(stderr, "Server closed\n");
+        return -1;
+    }
+    
+    printf("%s\n", line);
+    int code = atoi(line);
+
+    return (code == 130) ? 1 : 0;
+}
 
 
 /**
@@ -113,14 +206,31 @@ int main(int argc, char *argv[]) {
     printf("Server send: %s\n", line);
     
     // Vòng lặp chính để xử lý lệnh người dùng
-    
+    int logged_in = 0;
     
     while (1) {
-       /*
-       
-           TO DO
+        printf("----------------MENU----------------\n");
+        printf("1. Login\n");
+        printf("2. Register\n");
+        printf("3. Logout\n");
+        printf("4. Exit\n");
+        printf("Your choice(1-4): ");
+        
+        if (!fgets(line, sizeof(line), stdin)) break;
+        int choice = atoi(line);
 
-       */
+        if (choice == 1) {    
+            if (do_login(sock_fd) == 1) logged_in = 1;
+        } else if(choice == 2) {
+            do_register(sock_fd);
+        }else if (choice == 3) {
+            if (do_logout(sock_fd) == 1) logged_in = 0;
+        } else if (choice == 4) { 
+            if (logged_in) do_logout(sock_fd); 
+            printf("Goodbye!\n");
+            break;
+        } else printf("Invalid choice. Please enter 1, 2, 3, or 4.\n");
+        
     }
     
     close(sock_fd);

@@ -8,7 +8,7 @@ CLIENT_DIR = TCP_Client
 all: server client
 
 server:
-	$(CC) $(CFLAGS) -o server $(SERVER_DIR)/server.c
+	$(CC) $(CFLAGS) -o server $(SERVER_DIR)/server.c $(SERVER_DIR)/account.c
 
 client:
 	$(CC) $(CFLAGS) -o client $(CLIENT_DIR)/client.c
