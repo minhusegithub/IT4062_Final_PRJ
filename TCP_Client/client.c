@@ -1,3 +1,6 @@
+#include "common.h"
+#include "account.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +12,11 @@
 
 #define BUFFER_SIZE 1024
 #define MAX_LINE 1024
+
+
+#define REQ_LOGIN "LOGIN"
+#define REQ_REGISTER "REGISTER"
+#define REQ_LOGOUT "LOGOUT"
 
 /**
  * Remove trailing \r and \n characters from string
@@ -54,98 +62,29 @@ int receive_line(int sockfd, char *buf, size_t bufsz) {
     return (int)strlen(buf);
 }
 
-int do_login(int sock) {
-    char username[512], password[512], out[MAX_LINE], response[MAX_LINE];
+/**
+ * Send reply to client with format "message\r\n"
+ * @param sockfd Client socket descriptor
+ * @param msg Message to send
+ */
+void send_reply_sock(int sockfd , const char *msg) {
+    char out[MAX_LINE];
+    int n = snprintf(out, sizeof(out), "%s\r\n", msg);
+    if (n <= 0) return;
     
-    printf("Enter username: ");
-    if (!fgets(username, sizeof(username), stdin)) return -1;
-    printf("Enter password: ");
-    if (!fgets(password, sizeof(password), stdin)) return -1;
-
-    /* trim trailing CR/LF from stdin */
-    trim_CRLF(username);
-    trim_CRLF(password);
+    size_t total = (size_t)n; // total length of the message
+    size_t sent = 0; // number of bytes sent
     
-    if (strlen(username) == 0 || strlen(password) == 0) {
-        printf("Username and password cannot be empty\n");
-        return -1;
+    while (sent < total) {
+        ssize_t bytes_written = send(sockfd, out + sent, total - sent, 0);
+        if (bytes_written > 0) {
+            sent += (size_t)bytes_written;
+        } else if (bytes_written < 0 && errno == EINTR) {
+            continue; // if the send is interrupted, continue
+        } else {
+            break;
+        }
     }
-    
-    int n = snprintf(out, sizeof(out), "LOGIN %s %s\r\n", username ,password); // format the message to send to server
-    if (n < 0 || (size_t)n >= sizeof(out)) {
-        fprintf(stderr, "Input too long.\n");
-        return -1;
-    }
-    
-    if (send(sock, out, (size_t)n, 0) <= 0) {
-        perror("send");
-        return -1;
-    }
-    
-    if (receive_line(sock, response, sizeof(response)) <= 0) {
-        fprintf(stderr, "Server closed\n");
-        return -1;
-    }
-    
-    printf("Server send: %s\n", response);
-    return (atoi(response) == 110 );
-}
-
-void do_register(int sock){
-    char username[512], password[512], out[MAX_LINE], response[MAX_LINE];
-    
-    printf("Enter username to register: ");
-    if (!fgets(username, sizeof(username), stdin)) return;
-    printf("Enter password to register: ");
-    if (!fgets(password, sizeof(password), stdin)) return;
-
-    /* trim trailing CR/LF from stdin */
-    trim_CRLF(username);
-    trim_CRLF(password);
-    
-    if (strlen(username) == 0 || strlen(password) == 0) {
-        printf("Username and password cannot be empty\n");
-        return;
-    }
-    
-    int n = snprintf(out, sizeof(out), "REGISTER %s %s\r\n", username ,password); // format the message to send to server
-    if (n < 0 || (size_t)n >= sizeof(out)) {
-        fprintf(stderr, "Input too long.\n");
-        return;
-    }
-    
-    if (send(sock, out, (size_t)n, 0) <= 0) {
-        perror("send");
-        return;
-    } // Đảm bảo send đủ bytes TODO //
-    
-    if (receive_line(sock, response, sizeof(response)) <= 0) {
-        fprintf(stderr, "Server closed\n");
-        return;
-    }
-    
-    printf("Server send: %s\n", response);
-    return;
-}
-
-int do_logout(int sock) {
-    char line[MAX_LINE];
-    const char *out = "LOGOUT\r\n"; // format the message to send to server
-    
-    if (send(sock, out, strlen(out), 0) <= 0) {
-        perror("send");
-        return -1;
-    }
-    
-    if (receive_line(sock, line, sizeof(line)) <= 0) {
-        fprintf(stderr, "Server closed\n");
-        return -1;
-    }
-    
-    printf("%s\n", line);
-    int code = atoi(line);
-
-    return (code == 130) ? 1 : 0;
 }
 
 

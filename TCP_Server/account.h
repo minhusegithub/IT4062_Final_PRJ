@@ -21,7 +21,9 @@
 #define MSG_LOGIN_NOT_FOUND "Account not found"
 #define MSG_WRONG_PASSWORD "Wrong password"
 
-
+#define REQ_REGISTER "REGISTER"
+#define REQ_LOGOUT "LOGOUT"
+#define REQ_LOGIN "LOGIN"
 
 // Account structure: user_id|username|password||status
 typedef struct {

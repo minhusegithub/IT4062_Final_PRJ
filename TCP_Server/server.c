@@ -5,7 +5,6 @@
 #define BACKLOG 20
 
 
-
 // list of clients - using array with FD_SETSIZE
 Client clients[FD_SETSIZE];
 
@@ -94,11 +93,11 @@ void handle_message(int client_index, const char *message) {
         return;
     }
     
-    if (strcmp(command, "LOGIN") == 0) {
+    if (strcmp(command, REQ_LOGIN) == 0) {
         handle_login(client_index, message);
-    } else if (strcmp(command, "LOGOUT") == 0) {
+    } else if (strcmp(command, REQ_LOGOUT) == 0) {
         handle_logout(client_index);
-    } else if (strcmp(command, "REGISTER") == 0){
+    } else if (strcmp(command, REQ_REGISTER) == 0){
         handle_register(client_index, message);
     }
     else {

@@ -11,7 +11,7 @@ server:
 	$(CC) $(CFLAGS) -o server $(SERVER_DIR)/server.c $(SERVER_DIR)/account.c
 
 client:
-	$(CC) $(CFLAGS) -o client $(CLIENT_DIR)/client.c
+	$(CC) $(CFLAGS) -o client $(CLIENT_DIR)/client.c $(CLIENT_DIR)/account.c
 
 clean:
 	rm -f server client
