@@ -1,43 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/select.h>
-#include <errno.h>
+#include "common.h"
 #include "account.h"
 
-#define BUFFER_SIZE 1024
-#define MAX_LINE 1024
-// #define MAX_USERNAME 1000
-// #define MAX_PASSWORD 1000
 #define MAX_ACCOUNT 5000
 #define BACKLOG 20
 
-#define MSG_INVALID_COMMAND "Invalid command"
-#define MSG_LOGIN_ALREADY "Already logged in"
-#define MSG_LOGIN_NOT_FOUND "Account not found"
-#define MSG_LOGIN_LOCKED "Account is locked"
-#define MSG_LOGIN_SUCCESS "Login successful"
-#define MSG_NEED_LOGIN "Need to login first"
-#define MSG_LOGOUT_SUCCESS "Logout successful"
 
-
-
-
-typedef struct {
-    int socket_fd;
-    struct sockaddr_in address;
-    int user_id;
-    int is_logged_in; // 0: not logged in, 1: logged in
-} Client;
 
 // list of clients - using array with FD_SETSIZE
 Client clients[FD_SETSIZE];
-
-
 
 
 /**
@@ -53,8 +23,6 @@ void trim_CRLF(char *str) {
         len--;
     }
 }
-
-
 
 /**
  * Read bytes from socket one by one until \n character is encountered
@@ -112,129 +80,6 @@ void send_reply_sock(int sockfd, int code, const char *msg) {
     }
 }
 
-void handle_login(int client_index, const char *msg ) {
-    Client *client = &clients[client_index];
-    
-    // get username and password from msg format LOGIN <username> <password>
-    char username[MAX_USERNAME];
-    char password[MAX_PASSWORD];
-    
-    // Parse message: LOGIN <username> <password>
-    if (sscanf(msg, "LOGIN %s %s", username, password) != 2) {
-        send_reply_sock(client->socket_fd, 300, MSG_INVALID_COMMAND);
-        return;
-    }
-
-    if (client->is_logged_in) {
-        send_reply_sock(client->socket_fd, 213, MSG_LOGIN_ALREADY);
-        return;
-    }
-            
-    Account *account = find_account(username);
-    if (account == NULL) {
-        send_reply_sock(client->socket_fd, 212, MSG_LOGIN_NOT_FOUND);
-        return;
-    }
-    
-    if (strcmp(account->password, password) != 0) {
-        send_reply_sock(client->socket_fd, 214, "Wrong password");
-        return;
-    }
-    
-    if (account->status == 0) {
-        send_reply_sock(client->socket_fd, 211, MSG_LOGIN_LOCKED);
-        return;
-    }
-    
-    client->user_id = account->user_id;
-    client->is_logged_in = 1;
-
-    send_reply_sock(client->socket_fd, 110, MSG_LOGIN_SUCCESS);
-}
-
-void handle_bye(int client_index) {
-    Client *client = &clients[client_index];
-    
-    if (!client->is_logged_in) {
-        send_reply_sock(client->socket_fd, 221, MSG_NEED_LOGIN);
-        return;
-    }
-    
-    // Đăng xuất thành công
-    client->is_logged_in = 0;
-    client->user_id = -1;
-    send_reply_sock(client->socket_fd, 130, MSG_LOGOUT_SUCCESS);
-}
-
-
-
-
-void handle_register(int client_index, const char *msg ){
-    Client *client = &clients[client_index];
-    
-    // get username and password from msg format LOGIN <username> <password>
-    char username[MAX_USERNAME];
-    char password[MAX_PASSWORD];
-    
-    // Parse message: REGISTER <username> <password>
-    if (sscanf(msg, "REGISTER %s %s", username, password) != 2) {
-        send_reply_sock(client->socket_fd, 300, MSG_INVALID_COMMAND);
-        return;
-    }
-
-    
-    
-    // Check if username already exists
-    if (find_account(username) != NULL) {
-        send_reply_sock(client->socket_fd, 400, "User exists");
-        return ; // Username already exists
-    }
-    
-    
-    // Generate new user_id (increment from highest existing ID)
-    int new_user_id = 1;
-    for (int i = 0; i < account_count; i++) {
-        if (accounts[i].user_id >= new_user_id) {
-            new_user_id = accounts[i].user_id + 1;
-        }
-    }
-    
-    // Add to in-memory array
-    accounts[account_count].user_id = new_user_id;
-    strncpy(accounts[account_count].username, username, MAX_USERNAME - 1);
-    accounts[account_count].username[MAX_USERNAME - 1] = '\0';
-    strncpy(accounts[account_count].password, password, MAX_PASSWORD - 1);
-    accounts[account_count].password[MAX_PASSWORD - 1] = '\0';
-    accounts[account_count].status = 1; // Default status: active
-    
-    // Append to file
-    FILE *file = fopen(ACCOUNT_FILE_PATH, "a");
-    if (file == NULL) {
-        // Remove from array if file write fails
-        account_count--;
-        return ;
-    }
-    
-    // Write in format: user_id|username|password|status
-    fprintf(file, "%d|%s|%s|%d\n", 
-            accounts[account_count].user_id,
-            accounts[account_count].username,
-            accounts[account_count].password,
-            accounts[account_count].status);
-    
-    fclose(file);
-    account_count++;
-    send_reply_sock(client->socket_fd, 130, "Successfully Register");
-    return;
-    
-
-    
-}
-
-
-
-
-
 /**
  * Handle message from client and route to appropriate handler
  * @param client_index Client index in clients array
@@ -252,7 +97,7 @@ void handle_message(int client_index, const char *message) {
     if (strcmp(command, "LOGIN") == 0) {
         handle_login(client_index, message);
     } else if (strcmp(command, "LOGOUT") == 0) {
-        handle_bye(client_index);
+        handle_logout(client_index);
     } else if (strcmp(command, "REGISTER") == 0){
         handle_register(client_index, message);
     }

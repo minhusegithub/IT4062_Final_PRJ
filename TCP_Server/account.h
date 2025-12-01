@@ -4,11 +4,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "common.h"
 
 #define MAX_USERNAME 100
 #define MAX_PASSWORD 100
 #define MAX_ACCOUNT 5000
 #define ACCOUNT_FILE_PATH "TCP_Server/data/account.txt"
+
+#define MSG_REGISTER_SUCCESS "Register successful"
+#define MSG_USERNAME_EXISTS "Username already exists"
+#define MSG_LOGOUT_SUCCESS "Logout successful"
+#define MSG_NEED_LOGIN "Need to login first"
+#define MSG_LOGIN_SUCCESS "Login successful"
+#define MSG_LOGIN_LOCKED "Account is locked"
+#define MSG_LOGIN_ALREADY "Already logged in"
+#define MSG_LOGIN_NOT_FOUND "Account not found"
+#define MSG_WRONG_PASSWORD "Wrong password"
+
+
 
 // Account structure: user_id|username|password||status
 typedef struct {
@@ -25,6 +38,9 @@ extern int account_count;
 // Function declarations
 int load_accounts(const char *filename);
 Account* find_account(const char *username);
+void handle_register(int client_index, const char *msg );
+void handle_logout(int client_index);
+void handle_login(int client_index, const char *msg );
 
 
 #endif // ACCOUNT_H

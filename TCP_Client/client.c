@@ -117,7 +117,7 @@ void do_register(int sock){
     if (send(sock, out, (size_t)n, 0) <= 0) {
         perror("send");
         return;
-    }
+    } // Đảm bảo send đủ bytes TODO //
     
     if (receive_line(sock, response, sizeof(response)) <= 0) {
         fprintf(stderr, "Server closed\n");

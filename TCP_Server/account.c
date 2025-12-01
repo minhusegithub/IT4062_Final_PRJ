@@ -94,5 +94,120 @@ Account* find_account(const char *username) {
     return NULL;
 }
 
+/**
+ * Handle register request
+ * @param client_index Client index in clients array
+ * @param msg Message received from client
+ */
+void handle_register(int client_index, const char *msg ){
+    Client *client = &clients[client_index];
+    
+    // get username and password from msg format LOGIN <username> <password>
+    char username[MAX_USERNAME];
+    char password[MAX_PASSWORD];
+    
+    // Parse message: REGISTER <username> <password>
+    if (sscanf(msg, "REGISTER %s %s", username, password) != 2) {
+        send_reply_sock(client->socket_fd, 300, MSG_INVALID_COMMAND);
+        return;
+    }
 
+    // Check if username already exists
+    if (find_account(username) != NULL) {
+        send_reply_sock(client->socket_fd, 400, MSG_USERNAME_EXISTS);
+        return ;
+    }
+    
+    // Generate new user_id (increment from highest existing ID)
+    int new_user_id = account_count + 1;
+    
+    // Add to in-memory array
+    accounts[account_count].user_id = new_user_id;
+    strncpy(accounts[account_count].username, username, MAX_USERNAME - 1);
+    accounts[account_count].username[MAX_USERNAME - 1] = '\0';
+    strncpy(accounts[account_count].password, password, MAX_PASSWORD - 1);
+    accounts[account_count].password[MAX_PASSWORD - 1] = '\0';
+    accounts[account_count].status = 1; // Default status: active
+    
+    // Append to file
+    FILE *file = fopen(ACCOUNT_FILE_PATH, "a");
+    if (file == NULL) {
+        // Remove from array if file write fails
+        account_count--;
+        return ;
+    }
+    
+    // Write in format: user_id|username|password|status
+    fprintf(file, "%d|%s|%s|%d\n", 
+            accounts[account_count].user_id,
+            accounts[account_count].username,
+            accounts[account_count].password,
+            accounts[account_count].status);
+    
+    fclose(file);
+    account_count++;
+    send_reply_sock(client->socket_fd, 130, MSG_REGISTER_SUCCESS);
+    return;
+}
 
+/**
+ * Handle logout request
+ * @param client_index Client index in clients array
+ */
+void handle_logout(int client_index) {
+    Client *client = &clients[client_index];
+    
+    if (!client->is_logged_in) {
+        send_reply_sock(client->socket_fd, 221, MSG_NEED_LOGIN);
+        return;
+    }
+    
+    client->is_logged_in = 0;
+    client->user_id = -1;
+    send_reply_sock(client->socket_fd, 130, MSG_LOGOUT_SUCCESS);
+}
+
+/**
+ * Handle login request
+ * @param client_index Client index in clients array
+ * @param msg Message received from client
+ */
+void handle_login(int client_index, const char *msg ) {
+    Client *client = &clients[client_index];
+    
+    // get username and password from msg format LOGIN <username> <password>
+    char username[MAX_USERNAME];
+    char password[MAX_PASSWORD];
+    
+    // Parse message: LOGIN <username> <password>
+    if (sscanf(msg, "LOGIN %s %s", username, password) != 2) {
+        send_reply_sock(client->socket_fd, 300, MSG_INVALID_COMMAND);
+        return;
+    }
+
+    if (client->is_logged_in) {
+        send_reply_sock(client->socket_fd, 213, MSG_LOGIN_ALREADY);
+        return;
+    }
+            
+    Account *account = find_account(username);
+    if (account == NULL) {
+        send_reply_sock(client->socket_fd, 212, MSG_LOGIN_NOT_FOUND);
+        return;
+    }
+    
+    if (strcmp(account->password, password) != 0) {
+        send_reply_sock(client->socket_fd, 214, MSG_WRONG_PASSWORD);
+        return;
+    }
+    
+    if (account->status == 0) {
+        send_reply_sock(client->socket_fd, 211, MSG_LOGIN_LOCKED);
+        return;
+    }
+    
+    client->user_id = account->user_id;
+    client->is_logged_in = 1;
+
+    send_reply_sock(client->socket_fd, 110, MSG_LOGIN_SUCCESS);
+}
