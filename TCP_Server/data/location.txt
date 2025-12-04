@@ -1,0 +1,11 @@
+1|1|Highlands Coffee Bach Khoa|1 Dai Co Viet, Hai Ba Trung, HN|cafe|View dep, gan cong Parabol
+2|1|Pho Thin Lo Duc|13 Lo Duc, Hai Ba Trung, HN|restaurant|Pho bo tai lan truyen thong
+3|2|CGV Vincom Ba Trieu|191 Ba Trieu, Hai Ba Trung, HN|cinema|Rap chieu phim hien dai, ghe thoai mai
+4|2|Bun Cha Huong Lien|24 Le Van Huu, Hai Ba Trung, HN|restaurant|Quan bun cha Obama noi tieng
+5|3|The Coffee House|23M Hai Ba Trung, Hoan Kiem, HN|cafe|Khong gian yen tinh de lam viec
+6|1|Circle K Ta Quang Buu|99 Ta Quang Buu, Bach Khoa, HN|other|Cua hang tien loi mo 24/7
+7|3|Thu vien Ta Quang Buu|Dai hoc Bach Khoa HN|other|Thu vien lon nhat dong nam a
+8|4|Banh Mi Phuong|2B Phan Chau Trinh, Hoi An|restaurant|Banh mi ngon nhat the gioi
+9|2|Trung Nguyen Legend|12 Ly Thuong Kiet, Hoan Kiem, HN|cafe|Ca phe nang luong cho nguoi khoi nghiep
+10|5|Galaxy Cinema Nguyen Du|116 Nguyen Du, Q1, HCM|cinema|Rap phim gia re cho sinh vien
+11|1|HUST|90 Dai Co Viet|school|dai hoc so 1 cong nghe

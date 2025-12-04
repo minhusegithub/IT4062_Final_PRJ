@@ -1,5 +1,6 @@
 #include "common.h"
 #include "account.h"
+#include "location.h"
 
 #define MAX_ACCOUNT 5000
 #define BACKLOG 20
@@ -86,12 +87,25 @@ void send_reply_sock(int sockfd, int code, const char *msg) {
  */
 void handle_message(int client_index, const char *message) {
     char command[BUFFER_SIZE];
-    
-    
-    if (sscanf(message, "%s", command) != 1) {
+    char args[BUFFER_SIZE]; // Biến chứa phần tham số phía sau lệnh (vd message = "ADD_LOCATION A|B|C" -> args = "A|B|C" )
+
+    memset(args, 0, sizeof(args));
+    memset(command, 0, sizeof(command));
+
+    // Phân tích message thành 2 phần: Command và Arguments
+    // %[^\n]: Đọc toàn bộ phần còn lại của dòng (tham số)
+    int parsed = sscanf(message, "%s %[^\n]", command, args); 
+
+    if (parsed < 1) {
         send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_COMMAND);
         return;
     }
+    
+    // Code cũ
+    // if (sscanf(message, "%s", command) != 1) {
+    //     send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_COMMAND);
+    //     return;
+    // }
     
     if (strcmp(command, REQ_LOGIN) == 0) {
         handle_login(client_index, message);
@@ -99,6 +113,14 @@ void handle_message(int client_index, const char *message) {
         handle_logout(client_index);
     } else if (strcmp(command, REQ_REGISTER) == 0){
         handle_register(client_index, message);
+    }
+    else if (strcmp(command, REQ_ADD_LOCATION) == 0) {
+        // args bao gồm "name|addr|cat|desc"
+        handle_add_location(client_index, args);
+    }
+    else if (strcmp(command, REQ_GET_LOCATIONS) == 0) {
+        // args chứa category hoặc rỗng
+        handle_get_locations(client_index, args);
     }
     else {
         send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_COMMAND);
@@ -132,6 +154,12 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
     printf("Loaded %d accounts\n", account_count);
+
+    // Load locations
+    if (load_locations(LOCATION_FILE_PATH) < 0) {
+        fprintf(stderr, "Warning: Failed to load locations or file empty\n");
+    }
+    printf("Loaded %d locations\n", location_count);
     
     
     // Step 1: Construct TCP Socket

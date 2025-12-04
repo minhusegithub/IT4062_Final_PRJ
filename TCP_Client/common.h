@@ -11,6 +11,9 @@
 #include <sys/select.h>
 #include <errno.h>
 
+#define BUFFER_SIZE 1024
+#define MAX_LINE 1024
+
 void trim_CRLF(char *str);
 int receive_line(int sockfd, char *buf, size_t bufsz);
 void send_reply_sock(int sockfd , const char *msg);

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "account.h"
+#include "location.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,23 +11,26 @@
 #include <arpa/inet.h>
 #include <errno.h>
 
-#define BUFFER_SIZE 1024
-#define MAX_LINE 1024
 
 
 #define REQ_LOGIN "LOGIN"
 #define REQ_REGISTER "REGISTER"
 #define REQ_LOGOUT "LOGOUT"
+#define REQ_ADD_LOCATION "ADD_LOCATION"
+#define REQ_GET_LOCATIONS "GET_LOCATIONS"
 
 /**
  * Remove trailing \r and \n characters from string
  * @param str String to process (will be modified)
  */
-void trim_CRLF(char *str) {
-    if (str == NULL) return;
-    
+void trim_CRLF(char *str)
+{
+    if (str == NULL)
+        return;
+
     int len = strlen(str);
-    while (len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r')) {
+    while (len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
+    {
         str[len - 1] = '\0';
         len--;
     }
@@ -39,25 +43,34 @@ void trim_CRLF(char *str) {
  * @param bufsz Buffer size
  * @return Length of line read, 0 if connection closed, -1 on error
  */
-int receive_line(int sockfd, char *buf, size_t bufsz) {
+int receive_line(int sockfd, char *buf, size_t bufsz)
+{
     size_t idx = 0;
-    while (idx < bufsz - 1) { // read bytes from socket one by one until \n character 
+    while (idx < bufsz - 1)
+    { // read bytes from socket one by one until \n character
         ssize_t n = recv(sockfd, &buf[idx], 1, 0);
-        if (n == 1) {
-            if (buf[idx] == '\n') {
+        if (n == 1)
+        {
+            if (buf[idx] == '\n')
+            {
                 buf[idx] = '\0';
                 trim_CRLF(buf);
                 return (int)strlen(buf);
             }
             idx++;
-        } else if (n == 0) {
-            return 0; 
-        } else {
-            if (errno == EINTR) continue;
+        }
+        else if (n == 0)
+        {
+            return 0;
+        }
+        else
+        {
+            if (errno == EINTR)
+                continue;
             return -1;
         }
     }
-    buf[bufsz-1] = '\0';
+    buf[bufsz - 1] = '\0';
     trim_CRLF(buf);
     return (int)strlen(buf);
 }
@@ -67,26 +80,33 @@ int receive_line(int sockfd, char *buf, size_t bufsz) {
  * @param sockfd Client socket descriptor
  * @param msg Message to send
  */
-void send_reply_sock(int sockfd , const char *msg) {
+void send_reply_sock(int sockfd, const char *msg)
+{
     char out[MAX_LINE];
     int n = snprintf(out, sizeof(out), "%s\r\n", msg);
-    if (n <= 0) return;
-    
+    if (n <= 0)
+        return;
+
     size_t total = (size_t)n; // total length of the message
-    size_t sent = 0; // number of bytes sent
-    
-    while (sent < total) {
+    size_t sent = 0;          // number of bytes sent
+
+    while (sent < total)
+    {
         ssize_t bytes_written = send(sockfd, out + sent, total - sent, 0);
-        if (bytes_written > 0) {
+        if (bytes_written > 0)
+        {
             sent += (size_t)bytes_written;
-        } else if (bytes_written < 0 && errno == EINTR) {
+        }
+        else if (bytes_written < 0 && errno == EINTR)
+        {
             continue; // if the send is interrupted, continue
-        } else {
+        }
+        else
+        {
             break;
         }
     }
 }
-
 
 /**
  * Main client function
@@ -95,83 +115,113 @@ void send_reply_sock(int sockfd , const char *msg) {
  * @param argv Command line arguments (expects IP address and port number)
  * @return 0 on success, 1 on error
  */
-int main(int argc, char *argv[]) {
-    if (argc != 3) {
+int main(int argc, char *argv[])
+{
+    if (argc != 3)
+    {
         fprintf(stderr, "Usage: %s <IP_Addr> <Port_Number>\n", argv[0]);
         exit(1);
     }
-    
+
     char *ip_addr = argv[1];
     int port = atoi(argv[2]);
-    if (port <= 0 || port > 65535) {
+    if (port <= 0 || port > 65535)
+    {
         fprintf(stderr, "Invalid port number\n");
         exit(1);
     }
-    
+
     //  socket
     int sock_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock_fd < 0) {
+    if (sock_fd < 0)
+    {
         perror("Socket creation failed");
         exit(1);
     }
-    
+
     // Construct server
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(port);
-    
-    if (inet_pton(AF_INET, ip_addr, &server_addr.sin_addr) <= 0) {
+
+    if (inet_pton(AF_INET, ip_addr, &server_addr.sin_addr) <= 0)
+    {
         fprintf(stderr, "Invalid IP address\n");
         exit(1);
     }
-    
+
     // Kết nối đến server
-    if (connect(sock_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+    if (connect(sock_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
+    {
         perror("Connection failed");
         exit(1);
     }
-    
+
     printf("Connected to server %s:%d\n", ip_addr, port);
-    
+
     char line[MAX_LINE];
     /* read welcome */
     int r = receive_line(sock_fd, line, sizeof(line));
-    if (r <= 0) { 
+    if (r <= 0)
+    {
         fprintf(stderr, "Server closed or error\n");
-        close(sock_fd); 
+        close(sock_fd);
         return 1;
     }
     printf("Server send: %s\n", line);
-    
+
     // Vòng lặp chính để xử lý lệnh người dùng
     int logged_in = 0;
-    
-    while (1) {
+
+    while (1)
+    {
         printf("----------------MENU----------------\n");
         printf("1. Login\n");
         printf("2. Register\n");
         printf("3. Logout\n");
-        printf("4. Exit\n");
-        printf("Your choice(1-4): ");
-        
-        if (!fgets(line, sizeof(line), stdin)) break;
+        printf("4. Add Location\n");
+        printf("5. View Locations\n");
+        printf("6. Exit\n");
+        printf("Your choice (1-6): ");
+
+        if (!fgets(line, sizeof(line), stdin))
+            break;
         int choice = atoi(line);
 
-        if (choice == 1) {    
-            if (do_login(sock_fd) == 1) logged_in = 1;
-        } else if(choice == 2) {
+        if (choice == 1)
+        {
+            if (do_login(sock_fd) == 1)
+                logged_in = 1;
+        }
+        else if (choice == 2)
+        {
             do_register(sock_fd);
-        }else if (choice == 3) {
-            if (do_logout(sock_fd) == 1) logged_in = 0;
-        } else if (choice == 4) { 
-            if (logged_in) do_logout(sock_fd); 
+        }
+        else if (choice == 3)
+        {
+            if (do_logout(sock_fd) == 1)
+                logged_in = 0;
+        }
+        else if (choice == 4)
+        {
+            do_add_location(sock_fd);
+        }
+        else if (choice == 5)
+        {
+            do_get_locations(sock_fd);
+        }
+        else if (choice == 6)
+        {
+            if (logged_in)
+                do_logout(sock_fd);
             printf("Goodbye!\n");
             break;
-        } else printf("Invalid choice. Please enter 1, 2, 3, or 4.\n");
-        
+        }
+        else
+            printf("Invalid choice. Please enter 1, 2, 3, or 4.\n");
     }
-    
+
     close(sock_fd);
     return 0;
 }
