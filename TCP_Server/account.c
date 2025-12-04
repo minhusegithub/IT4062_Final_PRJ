@@ -99,18 +99,14 @@ Account* find_account(const char *username) {
  * @param client_index Client index in clients array
  * @param msg Message received from client
  */
-void handle_register(int client_index, const char *msg ){
+void handle_register(int client_index,  char *args ){
     Client *client = &clients[client_index];
     
-    // get username and password from msg format LOGIN <username> <password>
-    char username[MAX_USERNAME];
-    char password[MAX_PASSWORD];
+  
+    // Tách các tham số từ chuỗi args (username|password|)
+    char *username = strtok(args, "|");
+    char *password = strtok(NULL, " ");
     
-    // Parse message: REGISTER <username> <password>
-    if (sscanf(msg, "REGISTER %s %s", username, password) != 2) {
-        send_reply_sock(client->socket_fd, 300, MSG_INVALID_COMMAND);
-        return;
-    }
 
     // Check if username already exists
     if (find_account(username) != NULL) {
@@ -154,9 +150,9 @@ void handle_register(int client_index, const char *msg ){
  * Handle logout request
  * @param client_index Client index in clients array
  */
-void handle_logout(int client_index) {
+void handle_logout(int client_index ,  char *args) {
     Client *client = &clients[client_index];
-    
+    (void)args; // Suppress unused parameter warning
     if (!client->is_logged_in) {
         send_reply_sock(client->socket_fd, 221, MSG_NEED_LOGIN);
         return;
@@ -172,18 +168,12 @@ void handle_logout(int client_index) {
  * @param client_index Client index in clients array
  * @param msg Message received from client
  */
-void handle_login(int client_index, const char *msg ) {
+void handle_login(int client_index,  char *args ) {
     Client *client = &clients[client_index];
     
-    // get username and password from msg format LOGIN <username> <password>
-    char username[MAX_USERNAME];
-    char password[MAX_PASSWORD];
-    
-    // Parse message: LOGIN <username> <password>
-    if (sscanf(msg, "LOGIN %s %s", username, password) != 2) {
-        send_reply_sock(client->socket_fd, 300, MSG_INVALID_COMMAND);
-        return;
-    }
+    // Tách các tham số từ chuỗi args (username|password|)
+    char *username = strtok(args, "|");
+    char *password = strtok(NULL, "");
 
     if (client->is_logged_in) {
         send_reply_sock(client->socket_fd, 213, MSG_LOGIN_ALREADY);

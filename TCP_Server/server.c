@@ -108,11 +108,11 @@ void handle_message(int client_index, const char *message) {
     // }
     
     if (strcmp(command, REQ_LOGIN) == 0) {
-        handle_login(client_index, message);
+        handle_login(client_index, args);
     } else if (strcmp(command, REQ_LOGOUT) == 0) {
-        handle_logout(client_index);
+        handle_logout(client_index ,args);
     } else if (strcmp(command, REQ_REGISTER) == 0){
-        handle_register(client_index, message);
+        handle_register(client_index, args);
     }
     else if (strcmp(command, REQ_ADD_LOCATION) == 0) {
         // args bao gồm "name|addr|cat|desc"

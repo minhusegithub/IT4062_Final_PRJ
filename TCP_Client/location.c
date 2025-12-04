@@ -85,8 +85,11 @@ void do_get_locations(int sock)
         return;
     printf("%s\n", response);
 
-    if (strncmp(response, "220", 3) == 0)
+    int code = atoi(response);
+    if (code != 110) {
+        // Không thành công (220, 221, ...): in xong quay lại menu
         return;
+    }
 
     /* Ví dụ mess nhận được từ server 
     110 Found locations (2):

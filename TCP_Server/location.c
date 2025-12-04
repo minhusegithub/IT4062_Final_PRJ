@@ -6,6 +6,8 @@
 // Biến toàn cục để lưu danh sách địa điểm
 Location locations[MAX_LOCATIONS];
 int location_count = 0;
+// Biến toàn cục để lưu enum categories
+char categories[MAX_CATEGORY_ENUM][MAX_LOC_CAT] = {"restaurant", "cafe", "cinema", "fashion", "other" };
 
 /**
  * Save current locations from memory back to the text file
@@ -113,6 +115,10 @@ void handle_add_location(int client_index, char *args) {
         send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_FORMAT);
         return;
     }
+    if(check_category_valid(cat) == 0){
+        send_reply_sock(clients[client_index].socket_fd, 220, MSG_NO_CATEGORY);
+        return;
+    }
 
     // 3. Tạo ID mới (ID lớn nhất hiện tại + 1)
     int new_id = (location_count > 0) ? locations[location_count - 1].location_id + 1 : 1;
@@ -147,6 +153,11 @@ void handle_get_locations(int client_index, char *category) {
         send_reply_sock(clients[client_index].socket_fd, 221, MSG_NEED_LOGIN);
         return;
     }
+    if(!check_category_valid (category) ){
+        send_reply_sock(clients[client_index].socket_fd, 220, MSG_NO_CATEGORY );
+        return;
+    }
+        
 
     char buffer[4096] = ""; // Buffer chứa toàn bộ danh sách
     char line_buff[512];
@@ -182,21 +193,37 @@ void handle_get_locations(int client_index, char *category) {
         }
     }
 
-    if (found == 0) {
-        send_reply_sock(clients[client_index].socket_fd, 220, MSG_NO_LOCATIONS);
-    } else {
-        // Gửi mã thành công (110) kèm theo số lượng và danh sách
-        char header[100];
-        snprintf(header, sizeof(header), "%s (%d):", MSG_LOC_FOUND, found); // ví dụ: "Found locations (5):"
-        
-        // Cấp phát bộ nhớ động để nối header và nội dung danh sách
-        char *final_msg = malloc(strlen(header) + strlen(buffer) + 1);
-        if (final_msg) {
-            sprintf(final_msg, "%s%s", header, buffer);
-            send_reply_sock(clients[client_index].socket_fd, 110, final_msg);
-            free(final_msg);
-        }
-
-        send_reply_sock(clients[client_index].socket_fd, 110, MSG_END_DATA);
+    
+    
+    // Gửi mã thành công (110) kèm theo số lượng và danh sách
+    char header[100];
+    snprintf(header, sizeof(header), "%s (%d):", MSG_LOC_FOUND, found); // ví dụ: "Found locations (5):"
+    
+    // Cấp phát bộ nhớ động để nối header và nội dung danh sách
+    char *final_msg = malloc(strlen(header) + strlen(buffer) + 1);
+    if (final_msg) {
+        sprintf(final_msg, "%s%s", header, buffer);
+        send_reply_sock(clients[client_index].socket_fd, 110, final_msg);
+        free(final_msg);
     }
+
+    send_reply_sock(clients[client_index].socket_fd, 110, MSG_END_DATA);
+    
+}
+
+/**
+ * Check category is valid in enum categories
+ * @param char *categories category to check if is valid
+ */
+int check_category_valid(char *category){
+    if (category == NULL || strlen(category) == 0) {
+        return 2;
+    }
+
+    for (int i = 0; i < MAX_CATEGORY_ENUM; i++) {
+        if (strcmp(category, categories[i]) == 0) {
+            return 1;
+        }
+    }
+    return 0;
 }

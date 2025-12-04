@@ -22,7 +22,7 @@ int do_login(int sock) {
         return -1;
     }
     
-    int n = snprintf(out, sizeof(out), "%s %s %s", REQ_LOGIN, username, password); 
+    int n = snprintf(out, sizeof(out), "%s %s|%s", REQ_LOGIN, username, password); 
     if (n < 0 || (size_t)n >= sizeof(out)) {
         fprintf(stderr, "Input too long.\n");
         return -1;
@@ -56,7 +56,7 @@ void do_register(int sock){
         return;
     }
     
-    int n = snprintf(out, sizeof(out), "%s %s %s", REQ_REGISTER, username, password); // format the message to send to server
+    int n = snprintf(out, sizeof(out), "%s %s|%s", REQ_REGISTER, username, password); // format the message to send to server
     if (n < 0 || (size_t)n >= sizeof(out)) {
         fprintf(stderr, "Input too long.\n");
         return;

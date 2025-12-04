@@ -40,9 +40,9 @@ extern int account_count;
 // Function declarations
 int load_accounts(const char *filename);
 Account* find_account(const char *username);
-void handle_register(int client_index, const char *msg );
-void handle_logout(int client_index);
-void handle_login(int client_index, const char *msg );
+void handle_register(int client_index,  char *args );
+void handle_logout(int client_index ,  char *args);
+void handle_login(int client_index,  char *args );
 
 
 #endif // ACCOUNT_H

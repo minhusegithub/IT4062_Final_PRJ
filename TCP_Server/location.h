@@ -5,6 +5,7 @@
 #include "account.h"
 
 #define LOCATION_FILE_PATH "TCP_Server/data/location.txt"
+#define MAX_CATEGORY_ENUM 10 // Số lượng tối đa các category tự định nghĩa
 #define MAX_LOCATIONS 100 // Số lượng địa điểm tối đa mà Server
 #define MAX_LOC_NAME 100 // Độ dài tối đa cho Tên địa điểm (name)
 #define MAX_LOC_ADDR 200 // Độ dài tối đa cho Địa chỉ (address)
@@ -17,7 +18,7 @@
 
 // 2. Các thông báo phản hồi từ Server (Response Messages)
 #define MSG_ADD_SUCCESS     "Add location successful"
-#define MSG_NO_LOCATIONS    "No locations found"
+#define MSG_NO_CATEGORY     "No category found"
 #define MSG_LOC_FOUND       "Found locations"
 #define MSG_INVALID_FORMAT  "Invalid format. Use: name|addr|cat|desc"
 #define MSG_DB_ERROR        "Internal server error"
@@ -40,10 +41,12 @@ typedef struct {
 extern Location locations[MAX_LOCATIONS];
 extern int location_count;
 
+extern char categories[MAX_CATEGORY_ENUM][MAX_LOC_CAT];
 
 int load_locations(const char *filename);
 int save_locations(const char *filename);
 void handle_add_location(int client_index, char *args);
 void handle_get_locations(int client_index, char *category);
+int check_category_valid(char *category);
 
 #endif
