@@ -98,11 +98,9 @@ int load_locations(const char *filename) {
  * @param args The argument string containing location details separated by '|'
  */
 void handle_add_location(int client_index, char *args) {
+    
     // 1. Kiểm tra xem user đã đăng nhập chưa
-    if (clients[client_index].is_logged_in == 0) {
-        send_reply_sock(clients[client_index].socket_fd, 221, MSG_NEED_LOGIN);
-        return;
-    }
+    check_login(client_index);
 
     // 2. Tách các tham số từ chuỗi args (Name|Address|Category|Description)
     char *name = strtok(args, "|");
@@ -149,10 +147,8 @@ void handle_add_location(int client_index, char *args) {
 void handle_get_locations(int client_index, char *category) {
     
     // Kiểm tra xem user đã đăng nhập chưa
-    if (clients[client_index].is_logged_in == 0) {
-        send_reply_sock(clients[client_index].socket_fd, 221, MSG_NEED_LOGIN);
-        return;
-    }
+    check_login(client_index);
+    
     if(!check_category_valid (category) ){
         send_reply_sock(clients[client_index].socket_fd, 220, MSG_NO_CATEGORY );
         return;

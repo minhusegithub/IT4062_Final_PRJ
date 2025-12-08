@@ -13,12 +13,6 @@
 
 
 
-#define REQ_LOGIN "LOGIN"
-#define REQ_REGISTER "REGISTER"
-#define REQ_LOGOUT "LOGOUT"
-#define REQ_ADD_LOCATION "ADD_LOCATION"
-#define REQ_GET_LOCATIONS "GET_LOCATIONS"
-
 /**
  * Remove trailing \r and \n characters from string
  * @param str String to process (will be modified)
@@ -51,10 +45,10 @@ int receive_line(int sockfd, char *buf, size_t bufsz)
         ssize_t n = recv(sockfd, &buf[idx], 1, 0);
         if (n == 1)
         {
-            if (buf[idx] == '\n')
+            if (buf[idx-1] == '\r' && buf[idx] == '\n')
             {
-                buf[idx] = '\0';
-                trim_CRLF(buf);
+                buf[idx-1] = '\0';
+                
                 return (int)strlen(buf);
             }
             idx++;
@@ -80,7 +74,7 @@ int receive_line(int sockfd, char *buf, size_t bufsz)
  * @param sockfd Client socket descriptor
  * @param msg Message to send
  */
-void send_reply_sock(int sockfd, const char *msg)
+void send_to_server(int sockfd, const char *msg)
 {
     char out[MAX_LINE];
     int n = snprintf(out, sizeof(out), "%s\r\n", msg);

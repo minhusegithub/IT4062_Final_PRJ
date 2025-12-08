@@ -48,7 +48,7 @@ void do_add_location(int sock)
         return;
     }
 
-    send_reply_sock(sock, out);
+    send_to_server(sock, out);
     if (receive_line(sock, response, sizeof(response)) > 0)
     {
         printf("Server: %s\n", response);
@@ -78,7 +78,7 @@ void do_get_locations(int sock)
 
     // Format: GET_LOCATIONS category
     snprintf(out, sizeof(out), "%s %s", REQ_GET_LOCATIONS, cat);
-    send_reply_sock(sock, out);
+    send_to_server(sock, out);
 
     // 1. Đọc dòng đầu tiên
     if (receive_line(sock, response, sizeof(response)) <= 0)

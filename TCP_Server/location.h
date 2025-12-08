@@ -22,7 +22,7 @@
 #define MSG_LOC_FOUND       "Found locations"
 #define MSG_INVALID_FORMAT  "Invalid format. Use: name|addr|cat|desc"
 #define MSG_DB_ERROR        "Internal server error"
-#define MSG_END_DATA        "END_DATA"
+#define MSG_END_DATA        "\r\n"
 
 /**
  * Structure to represent a location entity

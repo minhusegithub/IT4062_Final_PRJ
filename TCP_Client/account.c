@@ -28,7 +28,7 @@ int do_login(int sock) {
         return -1;
     }
     
-    send_reply_sock(sock,out);
+    send_to_server(sock,out);
     
     if (receive_line(sock, response, sizeof(response)) <= 0) {
         fprintf(stderr, "Server closed\n");
@@ -62,7 +62,7 @@ void do_register(int sock){
         return;
     }
     
-    send_reply_sock(sock,out);
+    send_to_server(sock,out);
     
     if (receive_line(sock, response, sizeof(response)) <= 0) {
         fprintf(stderr, "Server closed\n");
@@ -78,7 +78,7 @@ int do_logout(int sock) {
     const char *out = REQ_LOGOUT; // format the message to send to server
     
     
-    send_reply_sock(sock,out);
+    send_to_server(sock,out);
 
     if (receive_line(sock, line, sizeof(line)) <= 0) {
         fprintf(stderr, "Server closed\n");
