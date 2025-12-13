@@ -1,6 +1,7 @@
 #include "common.h"
 #include "account.h"
 #include "location.h"
+#include "friend_request.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -176,8 +177,9 @@ int main(int argc, char *argv[])
         printf("3. Logout\n");
         printf("4. Add Location\n");
         printf("5. View Locations\n");
-        printf("6. Exit\n");
-        printf("Your choice (1-6): ");
+        printf("6. Send Friend Request\n");
+        printf("7. Exit\n");
+        printf("Your choice (1-7): ");
 
         if (!fgets(line, sizeof(line), stdin))
             break;
@@ -207,13 +209,17 @@ int main(int argc, char *argv[])
         }
         else if (choice == 6)
         {
+            do_send_friend_request(sock_fd);
+        }
+        else if (choice == 7)
+        {
             if (logged_in)
                 do_logout(sock_fd);
             printf("Goodbye!\n");
             break;
         }
         else
-            printf("Invalid choice. Please enter 1, 2, 3, or 4.\n");
+            printf("Invalid choice. Please enter 1-7.\n");
     }
 
     close(sock_fd);

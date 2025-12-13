@@ -1,6 +1,7 @@
 #include "common.h"
 #include "account.h"
 #include "location.h"
+#include "friend_request.h"
 
 #define MAX_ACCOUNT 5000
 #define BACKLOG 20
@@ -36,7 +37,7 @@ int receive_line(int sockfd, char *buf, size_t bufsz) {
     while (idx < bufsz - 1) {
         ssize_t n = recv(sockfd, &buf[idx], 1, 0);
         if (n == 1) {
-            if (buf[idx] == '\n') {
+            if (buf[idx-1] == '\r' && buf[idx] == '\n' ) {
                 buf[idx] = '\0';
                 trim_CRLF(buf);
                 return (int)strlen(buf);
@@ -122,6 +123,10 @@ void handle_message(int client_index, const char *message) {
         // args chứa category hoặc rỗng
         handle_get_locations(client_index, args);
     }
+    else if (strcmp(command, REQ_SEND_FRIEND_REQUEST) == 0) {
+        // args chứa username
+        handle_send_friend_request(client_index, args);
+    }
     else {
         send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_COMMAND);
     }
@@ -160,6 +165,12 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Warning: Failed to load locations or file empty\n");
     }
     printf("Loaded %d locations\n", location_count);
+    
+    // Load friend requests
+    if (load_friend_requests(FRIEND_REQUEST_FILE_PATH) < 0) {
+        fprintf(stderr, "Warning: Failed to load friend requests or file empty\n");
+    }
+    printf("Loaded %d friend_requests\n", friend_request_count);
     
     
     // Step 1: Construct TCP Socket
