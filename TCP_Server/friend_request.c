@@ -153,7 +153,7 @@ void handle_send_friend_request(int client_index, char *args) {
     
     // Parse username from args
     if (args == NULL || strlen(args) == 0) {
-        send_reply_sock(client->socket_fd, 300, "Invalid format");
+        send_reply_sock(client->socket_fd, 300, MSG_INVALID_COMMAND);
         return;
     }
     
@@ -170,7 +170,7 @@ void handle_send_friend_request(int client_index, char *args) {
     }
     
     if (strlen(username) == 0) {
-        send_reply_sock(client->socket_fd, 300, "Invalid format");
+        send_reply_sock(client->socket_fd, 300, MSG_INVALID_COMMAND);
         return;
     }
     
@@ -200,7 +200,7 @@ void handle_send_friend_request(int client_index, char *args) {
     FriendRequestList *list = find_friend_request_list(to_user_id);
     
     if (list == NULL) {
-        // Create new entry
+        // Create new record
         if (friend_request_count >= MAX_FRIEND_REQUESTS) {
             send_reply_sock(client->socket_fd, 400, "Server error: too many friend requests");
             return;
@@ -213,7 +213,7 @@ void handle_send_friend_request(int client_index, char *args) {
     } else {
         // Add to existing list
         if (list->request_count >= MAX_FRIEND_REQUESTS_PER_USER) {
-            send_reply_sock(client->socket_fd, 400, "Server error: user has too many requests");
+            send_reply_sock(client->socket_fd, 405, MSG_TOO_MANY_REQUEST_PER_USER);
             return;
         }
         

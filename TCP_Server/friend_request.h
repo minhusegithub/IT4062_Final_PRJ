@@ -5,8 +5,8 @@
 #include "account.h"
 
 #define FRIEND_REQUEST_FILE_PATH "TCP_Server/data/friend_request.txt"
-#define MAX_FRIEND_REQUESTS 1024  // Tối đa 1024 users khác nhau có thể có danh sách lời mời.
-#define MAX_FRIEND_REQUESTS_PER_USER 500  // Tối đa 500 lời mời mà một user có thể nhận
+#define MAX_FRIEND_REQUESTS 1024  // Up to 1024 different users can have an invitation list.
+#define MAX_FRIEND_REQUESTS_PER_USER 500  // A user can receive a maximum of 500 invitations.
 
 // Request command
 #define REQ_SEND_FRIEND_REQUEST "SEND_FRIEND_REQUEST"
@@ -16,12 +16,13 @@
 #define MSG_USER_NOT_FOUND "User not found"
 #define MSG_ALREADY_SENT "Friend request already sent"
 #define MSG_SELF_REQUEST "Cannot send friend request to yourself"
+#define MSG_TOO_MANY_REQUEST_PER_USER "User has too many requests"
 
 // Structure to store friend requests for a user
 typedef struct {
     int user_id;
     int request_count;
-    int request_ids[MAX_FRIEND_REQUESTS_PER_USER];  // Danh sách user_id đã gửi lời mời
+    int request_ids[MAX_FRIEND_REQUESTS_PER_USER];  // List of people who sent invitations to user_id
 } FriendRequestList;
 
 // Global variables

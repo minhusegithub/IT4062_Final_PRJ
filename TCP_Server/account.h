@@ -8,7 +8,7 @@
 
 #define MAX_USERNAME 100
 #define MAX_PASSWORD 100
-#define MAX_ACCOUNT 5000
+#define MAX_ACCOUNT 1024
 #define ACCOUNT_FILE_PATH "TCP_Server/data/account.txt"
 
 #define MSG_REGISTER_SUCCESS "Register successful"

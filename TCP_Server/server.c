@@ -3,7 +3,6 @@
 #include "location.h"
 #include "friend_request.h"
 
-#define MAX_ACCOUNT 5000
 #define BACKLOG 20
 
 
