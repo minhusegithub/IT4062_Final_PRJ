@@ -9,3 +9,4 @@
 9|2|Trung Nguyen Legend|12 Ly Thuong Kiet, Hoan Kiem, HN|cafe|Ca phe nang luong cho nguoi khoi nghiep
 10|5|Galaxy Cinema Nguyen Du|116 Nguyen Du, Q1, HCM|cinema|Rap phim gia re cho sinh vien
 11|1|HUST|90 Dai Co Viet|school|dai hoc so 1 cong nghe
+12|1|Pes|123 Tran Dai Nghia, Ha Noi|other|quan dien tu da bong

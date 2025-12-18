@@ -17,22 +17,22 @@ void do_add_location(int sock)
     printf("Name: ");
     if (!fgets(name, sizeof(name), stdin))
         return;
-    trim_CRLF(name);
+    trim(name);
 
     printf("Address: ");
     if (!fgets(addr, sizeof(addr), stdin))
         return;
-    trim_CRLF(addr);
+    trim(addr);
 
-    printf("Category (restaurant/cafe/cinema/fashion): ");
+    printf("Category (restaurant/cafe/cinema/fashion/other): ");
     if (!fgets(cat, sizeof(cat), stdin))
         return;
-    trim_CRLF(cat);
+    trim(cat);
 
     printf("Description: ");
     if (!fgets(desc, sizeof(desc), stdin))
         return;
-    trim_CRLF(desc);
+    trim(desc);
 
     if (strlen(name) == 0 || strlen(addr) == 0)
     {
@@ -65,11 +65,18 @@ void do_get_locations(int sock)
     char response[4096]; // Large buffer for list
 
     printf("\n--- List Locations ---\n");
+    // 1. Hiển thị gợi ý danh mục
+    printf("Available Categories:\n");
+    printf("  - restaurant\n");
+    printf("  - cafe\n");
+    printf("  - cinema\n");
+    printf("  - fashion\n");
+
     printf("Enter category to filter (leave empty for all): ");
 
     if (fgets(cat, sizeof(cat), stdin))
     {
-        trim_CRLF(cat);
+        trim(cat);
     }
     else
     {
@@ -86,16 +93,17 @@ void do_get_locations(int sock)
     printf("%s\n", response);
 
     int code = atoi(response);
-    if (code != 110) {
+    if (code != 110)
+    {
         // Không thành công (220, 221, ...): in xong quay lại menu
         return;
     }
 
-    /* Ví dụ mess nhận được từ server 
+    /* Ví dụ mess nhận được từ server
     110 Found locations (2):
     110 1. Highlands Coffee Bach Khoa - 1 Dai Co Viet, Hai Ba Trung, HN (cafe)
     110 2. Pho Thin Lo Duc - 13 Lo Duc, Hai Ba Trung, HN (restaurant)
-    110 END_DATA */
+    110 /r/n */
 
     while (1)
     {

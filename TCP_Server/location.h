@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "account.h"
+#include <strings.h>
 
 #define LOCATION_FILE_PATH "TCP_Server/data/location.txt"
 #define MAX_CATEGORY_ENUM 10 // Số lượng tối đa các category tự định nghĩa
@@ -22,7 +23,7 @@
 #define MSG_LOC_FOUND       "Found locations"
 #define MSG_INVALID_FORMAT  "Invalid format. Use: name|addr|cat|desc"
 #define MSG_DB_ERROR        "Internal server error"
-#define MSG_END_DATA        "\r\n"
+#define MSG_END_DATA        "End of data"
 
 /**
  * Structure to represent a location entity

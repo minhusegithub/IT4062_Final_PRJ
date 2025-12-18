@@ -10,11 +10,13 @@
 #include <arpa/inet.h>
 #include <sys/select.h>
 #include <errno.h>
+#include <ctype.h>
 
 #define BUFFER_SIZE 1024
 #define MAX_LINE 1024
 
 void trim_CRLF(char *str);
+void trim(char *str);
 int receive_line(int sockfd, char *buf, size_t bufsz);
 void send_to_server(int sockfd , const char *msg);
  
