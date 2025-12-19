@@ -40,7 +40,23 @@ void do_send_friend_request(int sock) {
     }
     
     printf("Server send: %s\n", response);
-    
-    
+}
+
+/**
+ * Get list of friend requests for current user
+ * @param sock Socket descriptor
+ */
+void do_get_friend_requests(int sock) {
+    char response[MAX_LINE];
+
+    // Gửi lệnh GET_FRIEND_REQUESTS (không có tham số)
+    send_to_server(sock, REQ_GET_FRIEND_REQUESTS);
+
+    if (receive_line(sock, response, sizeof(response)) <= 0) {
+        fprintf(stderr, "Server closed\n");
+        return;
+    }
+
+    printf("Server send: %s\n", response);
 }
 

@@ -166,6 +166,10 @@ void handle_message(int client_index, const char *message)
         // args chứa username
         handle_send_friend_request(client_index, args);
     }
+    else if (strcmp(command, REQ_GET_FRIEND_REQUESTS) == 0)
+    {
+        handle_get_friend_requests(client_index);
+    }
     else
     {
         send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_COMMAND);

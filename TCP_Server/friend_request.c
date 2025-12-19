@@ -231,3 +231,66 @@ void handle_send_friend_request(int client_index, char *args) {
     }
 }
 
+/**
+ * Handle GET_FRIEND_REQUESTS command
+ * @param client_index Client index in clients array
+ */
+void handle_get_friend_requests(int client_index) {
+    Client *client = &clients[client_index];
+
+    // Check login (221 if not logged in)
+    if (check_login(client_index) == 0) {
+        return;
+    }
+
+    int user_id = client->user_id;
+
+    // Find friend request list for this user
+    FriendRequestList *list = find_friend_request_list(user_id);
+    if (list == NULL || list->request_count == 0) {
+        // Không có lời mời 
+        send_reply_sock(client->socket_fd, 222, MSG_NO_INVITATION);
+        return;
+    }
+    char final_msg[4096 + strlen(MSG_GET_FRIEND_REQUESTS_SUCCESS) + 1];
+    char buffer[4096];
+    snprintf(buffer, sizeof(buffer), "%d %s:", list->request_count, "requests"); // ví dụ: "2 requests"
+
+    char line[256];
+
+    
+    for (int i = 0; i < list->request_count; i++) {
+        int from_user_id = list->request_ids[i];
+
+        // Tìm username tương ứng với from_user_id
+        const char *username = "Unknown";
+        for (int j = 0; j < account_count; j++) {
+            if (accounts[j].user_id == from_user_id) {
+                username = accounts[j].username;
+                break;
+            }
+        }
+
+        snprintf(line, sizeof(line), "%d. %s (id=%d)", i + 1, username, from_user_id);
+
+        // Tránh tràn buffer
+        if (strlen(buffer) + strlen(line) + 2 >= sizeof(buffer)) {
+            break;
+        }
+
+        if (buffer[0] != '\0') {
+            strcat(buffer, "\n");
+        }
+        strcat(buffer, line);
+    }
+    strcat(final_msg , MSG_GET_FRIEND_REQUESTS_SUCCESS);
+    strcat(final_msg , "\n");
+    strcat(final_msg , buffer);
+
+    send_reply_sock(client->socket_fd, 130, final_msg);
+    
+
+    //buffer
+
+}
+
