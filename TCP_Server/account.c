@@ -200,9 +200,10 @@ void handle_login(int client_index,  char *args ) {
 }
 
 
-void check_login(int client_index){
+int check_login(int client_index){
     if (clients[client_index].is_logged_in == 0) {    
         send_reply_sock(clients[client_index].socket_fd, 221, MSG_NEED_LOGIN);
-        return;
+        return 0;
     }
+    return 1; 
 }

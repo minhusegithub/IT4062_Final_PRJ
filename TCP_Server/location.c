@@ -114,7 +114,9 @@ void handle_add_location(int client_index, char *args)
 {
 
     // 1. Kiểm tra xem user đã đăng nhập chưa
-    check_login(client_index);
+    if (check_login(client_index) == 0) {
+        return; 
+    }
 
     // 2. Tách các tham số từ chuỗi args (Name|Address|Category|Description)
     char *name = strtok(args, "|");
@@ -185,7 +187,9 @@ void handle_get_locations(int client_index, char *category)
 {
 
     // Kiểm tra xem user đã đăng nhập chưa
-    check_login(client_index);
+    if (check_login(client_index) == 0) {
+        return; 
+    }
 
     if (!check_category_valid(category))
     {
@@ -282,7 +286,9 @@ int check_category_valid(char *category)
 void handle_update_location(int client_index, char *args)
 {
     // 1. Kiểm tra đăng nhập
-    check_login(client_index);
+    if (check_login(client_index) == 0) {
+        return; 
+    }
 
     // 2. Tách các tham số: id|name|addr|cat|desc
     char *token = strtok(args, "|");
@@ -373,7 +379,9 @@ void handle_update_location(int client_index, char *args)
 void handle_delete_location(int client_index, char *args)
 {
     // 1. Kiểm tra đăng nhập
-    check_login(client_index);
+    if (check_login(client_index) == 0) {
+        return; 
+    }
 
     // 2. Lấy ID địa điểm từ tham số
     if (!args || strlen(args) == 0)
@@ -431,7 +439,9 @@ void handle_delete_location(int client_index, char *args)
  */
 void handle_view_my_locations(int client_index)
 {
-    check_login(client_index);
+    if (check_login(client_index) == 0) {
+        return; 
+    }
 
     char buffer[4096] = "";
     char line_buff[512];
