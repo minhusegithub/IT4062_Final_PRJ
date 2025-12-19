@@ -86,10 +86,12 @@ int main(int argc, char *argv[])
         printf("3. Logout\n");
         printf("4. Add Location\n");
         printf("5. View Locations\n");
-        printf("6. Send Friend Request\n");
-        printf("7. Exit\n");
-        printf("Your choice (1-7): ");
-
+        printf("6. View My Locations\n");
+        printf("7. Update Location\n");
+        printf("8. Delete Location\n");
+        printf("9. Send Friend Request\n");
+        printf("10. Exit\n");
+        printf("Your choice (1-10): ");
         if (!fgets(line, sizeof(line), stdin))
             break;
         int choice = atoi(line);
@@ -116,11 +118,22 @@ int main(int argc, char *argv[])
         {
             do_get_locations(sock_fd);
         }
-        else if (choice == 6)
+        else if (choice == 6) {         
+            do_view_my_locations(sock_fd);
+        }
+        else if (choice == 7) 
+        {
+            do_update_location(sock_fd);
+        }
+        else if (choice == 8) 
+        {
+            do_delete_location(sock_fd);
+        }
+        else if (choice == 9)
         {
             do_send_friend_request(sock_fd);
         }
-        else if (choice == 7)
+        else if (choice == 10)
         {
             if (logged_in)
                 do_logout(sock_fd);

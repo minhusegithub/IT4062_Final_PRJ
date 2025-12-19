@@ -16,9 +16,16 @@
 // 1. Các lệnh yêu cầu từ Client (Request Commands)
 #define REQ_ADD_LOCATION    "ADD_LOCATION"
 #define REQ_GET_LOCATIONS   "GET_LOCATIONS"
+#define REQ_UPDATE_LOCATION "UPDATE_LOCATION" 
+#define REQ_DELETE_LOCATION "DELETE_LOCATION" 
+#define REQ_VIEW_MY_LOCATIONS "VIEW_MY_LOCATIONS"
 
 // 2. Các thông báo phản hồi từ Server (Response Messages)
 #define MSG_ADD_SUCCESS     "Add location successful"
+#define MSG_UPDATE_SUCCESS  "Update location successful"
+#define MSG_DELETE_SUCCESS  "Delete location successful"
+#define MSG_LOC_NOT_FOUND   "Location not found"
+#define MSG_NO_PERMISSION   "Permission denied (Not owner)"
 #define MSG_NO_CATEGORY     "No category found"
 #define MSG_LOC_FOUND       "Found locations"
 #define MSG_INVALID_FORMAT  "Invalid format. Use: name|addr|cat|desc"
@@ -48,6 +55,9 @@ int load_locations(const char *filename);
 int save_locations(const char *filename);
 void handle_add_location(int client_index, char *args);
 void handle_get_locations(int client_index, char *category);
+void handle_update_location(int client_index, char *args);
+void handle_delete_location(int client_index, char *args);
+void handle_view_my_locations(int client_index);
 int check_category_valid(char *category);
 
 #endif

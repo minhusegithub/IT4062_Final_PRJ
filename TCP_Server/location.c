@@ -272,3 +272,212 @@ int check_category_valid(char *category)
     }
     return 0;
 }
+
+
+/**
+ * Handle UPDATE_LOCATION request from client
+ * @param client_index Index of the client in the global clients array
+ * @param args Argument string containing location details to update (format: id|name|addr|cat|desc)
+ */
+void handle_update_location(int client_index, char *args)
+{
+    // 1. Kiểm tra đăng nhập
+    check_login(client_index);
+
+    // 2. Tách các tham số: id|name|addr|cat|desc
+    char *token = strtok(args, "|");
+    if (!token)
+    {
+        send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_FORMAT);
+        return;
+    }
+    int loc_id = atoi(token);
+
+    char *name = strtok(NULL, "|");
+    char *addr = strtok(NULL, "|");
+    char *cat = strtok(NULL, "|");
+    char *desc = strtok(NULL, "|");
+
+    if (!name || !addr || !cat || !desc)
+    {
+        send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_FORMAT);
+        return;
+    }
+
+    // 3. Tìm địa điểm trong danh sách hiện có
+    int found_idx = -1;
+    for (int i = 0; i < location_count; i++)
+    {
+        if (locations[i].location_id == loc_id)
+        {
+            found_idx = i;
+            break;
+        }
+    }
+
+    if (found_idx == -1)
+    {
+        send_reply_sock(clients[client_index].socket_fd, 220, MSG_LOC_NOT_FOUND);
+        return;
+    }
+
+    // 4. Kiểm tra quyền (Chỉ người tạo mới được sửa)
+    if (locations[found_idx].user_id != clients[client_index].user_id)
+    {
+        send_reply_sock(clients[client_index].socket_fd, 222, MSG_NO_PERMISSION);
+        return;
+    }
+
+    // 5. Kiểm tra và chuẩn hóa Category (Danh mục)
+    int found_cat = 0;
+    for (int i = 0; i < MAX_CATEGORY_ENUM; i++)
+    {
+        if (categories[i][0] == '\0') break;
+        
+        // So sánh không phân biệt hoa thường
+        if (strcasecmp(cat, categories[i]) == 0)
+        {
+            found_cat = 1;
+            strcpy(cat, categories[i]); // Chuẩn hóa về chữ thường theo enum
+            break;
+        }
+    }
+    // Nếu không khớp danh mục nào, gán là "other"
+    if (!found_cat)
+    {
+        strcpy(cat, "other");
+    }
+
+    // 6. Cập nhật dữ liệu vào bộ nhớ
+    strncpy(locations[found_idx].name, name, MAX_LOC_NAME - 1);
+    strncpy(locations[found_idx].address, addr, MAX_LOC_ADDR - 1);
+    strncpy(locations[found_idx].category, cat, MAX_LOC_CAT - 1);
+    strncpy(locations[found_idx].description, desc, MAX_LOC_DESC - 1);
+
+    // 7. Lưu lại xuống file
+    if (save_locations(LOCATION_FILE_PATH) == 0)
+    {
+        send_reply_sock(clients[client_index].socket_fd, 130, MSG_UPDATE_SUCCESS);
+    }
+    else
+    {
+        send_reply_sock(clients[client_index].socket_fd, 400, MSG_DB_ERROR);
+    }
+}
+
+/**
+ * Handle DELETE_LOCATION request from client
+ * @param client_index Index of the client in the global clients array
+ * @param args Argument string containing ID of the location to delete
+ */
+void handle_delete_location(int client_index, char *args)
+{
+    // 1. Kiểm tra đăng nhập
+    check_login(client_index);
+
+    // 2. Lấy ID địa điểm từ tham số
+    if (!args || strlen(args) == 0)
+    {
+        send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_FORMAT);
+        return;
+    }
+    int loc_id = atoi(args);
+
+    // 3. Tìm địa điểm trong danh sách
+    int found_idx = -1;
+    for (int i = 0; i < location_count; i++)
+    {
+        if (locations[i].location_id == loc_id)
+        {
+            found_idx = i;
+            break;
+        }
+    }
+
+    if (found_idx == -1)
+    {
+        send_reply_sock(clients[client_index].socket_fd, 220, MSG_LOC_NOT_FOUND);
+        return;
+    }
+
+    // 4. Kiểm tra quyền (Chỉ người tạo mới được xóa)
+    if (locations[found_idx].user_id != clients[client_index].user_id)
+    {
+        send_reply_sock(clients[client_index].socket_fd, 222, MSG_NO_PERMISSION);
+        return;
+    }
+
+    // 5. Xóa khỏi bộ nhớ 
+    for (int i = found_idx; i < location_count - 1; i++)
+    {
+        locations[i] = locations[i + 1];
+    }
+    location_count--;
+
+    // 6. Lưu danh sách mới xuống file
+    if (save_locations(LOCATION_FILE_PATH) == 0)
+    {
+        send_reply_sock(clients[client_index].socket_fd, 140, MSG_DELETE_SUCCESS);
+    }
+    else
+    {
+        send_reply_sock(clients[client_index].socket_fd, 400, MSG_DB_ERROR);
+    }
+}
+
+/**
+ * Handle VIEW_MY_LOCATIONS request (List locations created by current user)
+ * @param client_index Index of the client in the global clients array
+ */
+void handle_view_my_locations(int client_index)
+{
+    check_login(client_index);
+
+    char buffer[4096] = "";
+    char line_buff[512];
+    int found = 0;
+    int current_uid = clients[client_index].user_id;
+
+    // Duyệt qua tất cả địa điểm
+    for (int i = 0; i < location_count; i++)
+    {
+        // Lọc: Chỉ lấy địa điểm có user_id trùng với người đang gọi
+        if (locations[i].user_id == current_uid)
+        {
+            snprintf(line_buff, sizeof(line_buff), "\n%d. %s - %s (%s)",
+                     locations[i].location_id,
+                     locations[i].name,
+                     locations[i].address,
+                     locations[i].category);
+
+            if (strlen(buffer) + strlen(line_buff) < sizeof(buffer) - 1)
+            {
+                strcat(buffer, line_buff);
+                found++;
+            }
+            else
+            {
+                break; // Buffer đầy
+            }
+        }
+    }
+
+    // Gửi phản hồi
+    char header[100];
+    if (found > 0) {
+        snprintf(header, sizeof(header), "Your locations (%d):", found);
+    } else {
+        snprintf(header, sizeof(header), "You haven't added any locations yet.");
+    }
+
+    char *final_msg = malloc(strlen(header) + strlen(buffer) + 1);
+    if (final_msg)
+    {
+        sprintf(final_msg, "%s%s", header, buffer);
+        send_reply_sock(clients[client_index].socket_fd, 110, final_msg);
+        free(final_msg);
+    }
+    
+    // Gửi tín hiệu kết thúc dữ liệu
+    send_reply_sock(clients[client_index].socket_fd, 110, MSG_END_DATA);
+}
