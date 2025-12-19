@@ -149,7 +149,9 @@ void handle_send_friend_request(int client_index, char *args) {
     Client *client = &clients[client_index];
     
     // Check if user is logged in
-    check_login(client_index);
+    if (check_login(client_index) == 0) {
+        return; 
+    }
     
     // Parse username from args
     if (args == NULL || strlen(args) == 0) {

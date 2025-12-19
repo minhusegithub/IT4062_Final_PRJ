@@ -43,7 +43,6 @@ Account* find_account(const char *username);
 void handle_register(int client_index,  char *args );
 void handle_logout(int client_index ,  char *args);
 void handle_login(int client_index,  char *args );
-// void check_login(int client_index); xoa ham nay di
 int check_login(int client_index);
 
 #endif // ACCOUNT_H

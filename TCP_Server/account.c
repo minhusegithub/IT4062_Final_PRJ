@@ -153,7 +153,10 @@ void handle_register(int client_index,  char *args ){
 void handle_logout(int client_index ,  char *args) {
     Client *client = &clients[client_index];
     (void)args; // Suppress unused parameter warning
-    check_login(client_index);
+    // check login
+    if(check_login(client_index) == 0){
+        return;
+    };
     
     client->is_logged_in = 0;
     client->user_id = -1;
@@ -199,7 +202,11 @@ void handle_login(int client_index,  char *args ) {
     send_reply_sock(client->socket_fd, 110, MSG_LOGIN_SUCCESS);
 }
 
-
+/**
+    *check login for code 221
+    @param client_index Client index in clients array
+    @return 1 if logged in , else 0
+*/
 int check_login(int client_index){
     if (clients[client_index].is_logged_in == 0) {    
         send_reply_sock(clients[client_index].socket_fd, 221, MSG_NEED_LOGIN);
