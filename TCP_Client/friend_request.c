@@ -60,3 +60,81 @@ void do_get_friend_requests(int sock) {
     printf("Server send: %s\n", response);
 }
 
+/**
+ * Accept a friend request
+ * @param sock Socket descriptor
+ */
+void do_accept_friend_request(int sock) {
+    char user_id_str[20], out[MAX_LINE], response[MAX_LINE];
+    
+    printf("\n--- Accept Friend Request ---\n");
+    printf("Enter user_id to accept friend request: ");
+    if (!fgets(user_id_str, sizeof(user_id_str), stdin)) {
+        printf("Error reading input\n");
+        return;
+    }
+    
+    // Trim trailing CR/LF from stdin
+    trim_CRLF(user_id_str);
+    
+    if (strlen(user_id_str) == 0) {
+        printf("User ID cannot be empty\n");
+        return;
+    }
+    
+    // Format: ACCEPT_FRIEND_REQUEST <user_id>
+    int n = snprintf(out, sizeof(out), "%s %s", REQ_ACCEPT_FRIEND_REQUEST, user_id_str);
+    if (n < 0 || (size_t)n >= sizeof(out)) {
+        fprintf(stderr, "Input too long.\n");
+        return;
+    }
+    
+    send_to_server(sock, out);
+    
+    if (receive_line(sock, response, sizeof(response)) <= 0) {
+        fprintf(stderr, "Server closed\n");
+        return;
+    }
+    
+    printf("Server send: %s\n", response);
+}
+
+/**
+ * Reject a friend request
+ * @param sock Socket descriptor
+ */
+void do_reject_friend_request(int sock) {
+    char user_id_str[20], out[MAX_LINE], response[MAX_LINE];
+    
+    printf("\n--- Reject Friend Request ---\n");
+    printf("Enter user_id to reject friend request: ");
+    if (!fgets(user_id_str, sizeof(user_id_str), stdin)) {
+        printf("Error reading input\n");
+        return;
+    }
+    
+    // Trim trailing CR/LF from stdin
+    trim_CRLF(user_id_str);
+    
+    if (strlen(user_id_str) == 0) {
+        printf("User ID cannot be empty\n");
+        return;
+    }
+    
+    // Format: REJECT_FRIEND_REQUEST <user_id>
+    int n = snprintf(out, sizeof(out), "%s %s", REQ_REJECT_FRIEND_REQUEST, user_id_str);
+    if (n < 0 || (size_t)n >= sizeof(out)) {
+        fprintf(stderr, "Input too long.\n");
+        return;
+    }
+    
+    send_to_server(sock, out);
+    
+    if (receive_line(sock, response, sizeof(response)) <= 0) {
+        fprintf(stderr, "Server closed\n");
+        return;
+    }
+    
+    printf("Server send: %s\n", response);
+}
+

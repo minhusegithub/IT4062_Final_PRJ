@@ -1,4 +1,5 @@
 #include "friend_request.h"
+#include "friend.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -203,10 +204,7 @@ void handle_send_friend_request(int client_index, char *args) {
     
     if (list == NULL) {
         // Create new record
-        if (friend_request_count >= MAX_FRIEND_REQUESTS) {
-            send_reply_sock(client->socket_fd, 400, "Server error: too many friend requests");
-            return;
-        }
+        
         
         friend_requests[friend_request_count].user_id = to_user_id;
         friend_requests[friend_request_count].request_count = 1;
@@ -225,10 +223,9 @@ void handle_send_friend_request(int client_index, char *args) {
     
     // Save to file
     if (save_friend_requests(FRIEND_REQUEST_FILE_PATH) == 0) {
-        send_reply_sock(client->socket_fd, 120, MSG_FRIEND_REQUEST_SUCCESS);
-    } else {
-        send_reply_sock(client->socket_fd, 400, "Server error: failed to save");
-    }
+        send_reply_sock(client->socket_fd, 120, MSG_FRIEND_REQUEST_SENT_SUCCESS);
+    } 
+    return;
 }
 
 /**
@@ -247,11 +244,17 @@ void handle_get_friend_requests(int client_index) {
 
     // Find friend request list for this user
     FriendRequestList *list = find_friend_request_list(user_id);
-    if (list == NULL || list->request_count == 0) {
-        // Không có lời mời 
+    if (list == NULL ) {
+        send_reply_sock(client->socket_fd, 223, MSG_NO_FRIEND_REQUEST_LIST);
+        return;
+    }
+    if(list->request_count == 0){
+        //Không có lời mời 
         send_reply_sock(client->socket_fd, 222, MSG_NO_INVITATION);
         return;
     }
+
+
     char final_msg[4096 + strlen(MSG_GET_FRIEND_REQUESTS_SUCCESS) + 1];
     char buffer[4096];
     snprintf(buffer, sizeof(buffer), "%d %s:", list->request_count, "requests"); // ví dụ: "2 requests"
@@ -288,9 +291,177 @@ void handle_get_friend_requests(int client_index) {
     strcat(final_msg , buffer);
 
     send_reply_sock(client->socket_fd, 130, final_msg);
+}
+
+/**
+ * Remove friend request from list
+ * @param user_id User ID who received the request
+ * @param from_user_id User ID who sent the request
+ * @return 0 on success, -1 if not found
+ */
+int remove_friend_request_from_list(int user_id, int from_user_id) {
+    FriendRequestList *list = find_friend_request_list(user_id);
+    if (list == NULL) {
+        return -1;
+    }
     
+    // Find and remove the request
+    for (int i = 0; i < list->request_count; i++) {
+        if (list->request_ids[i] == from_user_id) {
+            // Shift remaining elements
+            for (int j = i; j < list->request_count - 1; j++) {
+                list->request_ids[j] = list->request_ids[j + 1];
+            }
+            list->request_count--;
+            return 0;
+        }
+    }
+    
+    return -1;
+}
 
-    //buffer
+/**
+ * Handle ACCEPT_FRIEND_REQUEST command
+ * @param client_index Client index in clients array
+ * @param args Arguments containing user_id to accept
+ */
+void handle_accept_friend_request(int client_index, char *args) {
+    Client *client = &clients[client_index];
+    
+    // Check login (221 if not logged in)
+    if (check_login(client_index) == 0) {
+        return;
+    }
+    
+    // Parse user_id from args
+    if (args == NULL || strlen(args) == 0) {
+        send_reply_sock(client->socket_fd, 300, MSG_INVALID_COMMAND);
+        return;
+    }
+    
+    int friend_user_id = atoi(args);
+    if (friend_user_id <= 0) {
+        send_reply_sock(client->socket_fd, 300, MSG_INVALID_COMMAND);
+        return;
+    }
+    
+    int current_user_id = client->user_id;
+    
+    // Find friend request list for current user
+    FriendRequestList *list = find_friend_request_list(current_user_id);
+    if (list == NULL) {
+        send_reply_sock(client->socket_fd, 223, MSG_NO_FRIEND_REQUEST_LIST);
+        return;
+    }
+    
+    // Check if friend_user_id exists in request_ids
+    int found = 0;
+    for (int i = 0; i < list->request_count; i++) {
+        if (list->request_ids[i] == friend_user_id) {
+            found = 1;
+            break;
+        }
+    }
+    
+    if (!found) {
+        send_reply_sock(client->socket_fd, 220, MSG_NOT_FOUND_FRIEND_REQUEST);
+        return;
+    }
+    
+    // Remove delete 2-way from friend_request list
+    if (remove_friend_request_from_list(current_user_id, friend_user_id) != 0) {
+        send_reply_sock(client->socket_fd, 400, MSG_REMOVE_REQ_FAILED);
+        return;
+    }
+    
+    if (remove_friend_request_from_list(friend_user_id, current_user_id) != 0) {
+        send_reply_sock(client->socket_fd, 400, MSG_REMOVE_REQ_FAILED);
+        return;
+    }
+    
+    // Add to friend list 2-way to friend list
+    if (add_friend(current_user_id, friend_user_id) != 0) {
+        // If already friends, continue
+    }
+    
+    if (add_friend(friend_user_id, current_user_id) != 0) {
+        // If already friends, continue
+    }
+    
+    // Save 2 files
+    if (save_friend_requests(FRIEND_REQUEST_FILE_PATH) != 0) {
+        send_reply_sock(client->socket_fd, 400, "Server error: failed to save");
+        return;
+    }
+    
+    if (save_friends(FRIEND_FILE_PATH) != 0) {
+        send_reply_sock(client->socket_fd, 400, "Server error: failed to save");
+        return;
+    }
+    
+    send_reply_sock(client->socket_fd, 140, MSG_FRIEND_REQUEST_ACCEPT_SUCCESS);
+}
 
+/**
+ * Handle REJECT_FRIEND_REQUEST command
+ * @param client_index Client index in clients array
+ * @param args Arguments containing user_id to reject
+ */
+void handle_reject_friend_request(int client_index, char *args) {
+    Client *client = &clients[client_index];
+    
+    // Check login (221 if not logged in)
+    if (check_login(client_index) == 0) {
+        return;
+    }
+    
+    // Parse user_id from args
+    if (args == NULL || strlen(args) == 0) {
+        send_reply_sock(client->socket_fd, 300, MSG_INVALID_COMMAND);
+        return;
+    }
+    
+    int friend_user_id = atoi(args);
+    if (friend_user_id <= 0) {
+        send_reply_sock(client->socket_fd, 300, MSG_INVALID_COMMAND);
+        return;
+    }
+    
+    int current_user_id = client->user_id;
+    
+    // Find friend request list for current user
+    FriendRequestList *list = find_friend_request_list(current_user_id);
+    if (list == NULL) {
+        send_reply_sock(client->socket_fd, 223, MSG_NO_FRIEND_REQUEST_LIST);
+        return;
+    }
+    
+    // Check if friend_user_id exists in request_ids
+    int found = 0;
+    for (int i = 0; i < list->request_count; i++) {
+        if (list->request_ids[i] == friend_user_id) {
+            found = 1;
+            break;
+        }
+    }
+    
+    if (!found) {
+        send_reply_sock(client->socket_fd, 220, MSG_NOT_FOUND_FRIEND_REQUEST);
+        return;
+    }
+    
+    // Remove from friend_request list
+    if (remove_friend_request_from_list(current_user_id, friend_user_id) != 0) {
+        send_reply_sock(client->socket_fd, 400, MSG_REMOVE_REQ_FAILED);
+        return;
+    }
+    
+    // Save friend_request file
+    if (save_friend_requests(FRIEND_REQUEST_FILE_PATH) != 0) {
+        send_reply_sock(client->socket_fd, 400, "Server error: failed to save");
+        return;
+    }
+    
+    send_reply_sock(client->socket_fd, 150, MSG_FRIEND_REQUEST_REJECT_SUCCESS);
 }
 

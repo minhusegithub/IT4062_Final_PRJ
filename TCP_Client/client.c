@@ -91,8 +91,10 @@ int main(int argc, char *argv[])
         printf("8. Delete Location\n");
         printf("9. Send Friend Request\n");
         printf("10. View Friend Requests\n");
-        printf("11. Exit\n");
-        printf("Your choice (1-11): ");
+        printf("11. Accept Friend Request\n");
+        printf("12. Reject Friend Request\n");
+        printf("13. Exit\n");
+        printf("Your choice (1-13): ");
         if (!fgets(line, sizeof(line), stdin))
             break;
         int choice = atoi(line);
@@ -139,6 +141,14 @@ int main(int argc, char *argv[])
             do_get_friend_requests(sock_fd);
         }
         else if (choice == 11)
+        {
+            do_accept_friend_request(sock_fd);
+        }
+        else if (choice == 12)
+        {
+            do_reject_friend_request(sock_fd);
+        }
+        else if (choice == 13)
         {
             if (logged_in)
                 do_logout(sock_fd);

@@ -2,6 +2,7 @@
 #include "account.h"
 #include "location.h"
 #include "friend_request.h"
+#include "friend.h"
 
 #define BACKLOG 20
 
@@ -170,6 +171,14 @@ void handle_message(int client_index, const char *message)
     {
         handle_get_friend_requests(client_index);
     }
+    else if (strcmp(command, REQ_ACCEPT_FRIEND_REQUEST) == 0)
+    {
+        handle_accept_friend_request(client_index, args);
+    }
+    else if (strcmp(command, REQ_REJECT_FRIEND_REQUEST) == 0)
+    {
+        handle_reject_friend_request(client_index, args);
+    }
     else
     {
         send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_COMMAND);
@@ -219,6 +228,13 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Warning: Failed to load friend requests or file empty\n");
     }
     printf("Loaded %d friend_requests\n", friend_request_count);
+    
+    // Load friends
+    if (load_friends(FRIEND_FILE_PATH) < 0)
+    {
+        fprintf(stderr, "Warning: Failed to load friends or file empty\n");
+    }
+    printf("Loaded %d friends \n", friend_count);
 
     // Step 1: Construct TCP Socket
     int listenfd = socket(AF_INET, SOCK_STREAM, 0);
