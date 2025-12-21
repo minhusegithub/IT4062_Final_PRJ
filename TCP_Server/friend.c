@@ -132,31 +132,29 @@ FriendList* find_friend_list(int user_id) {
  * Add a friend to user's friend list
  * @param user_id User ID who will have the friend
  * @param friend_id Friend's user ID to add
- * @return 0 on success, -1 if already exists, -2 on error
+ * @return 0 on success, -1 if already friends, -2 if too many friends
  */
-int add_friend(int user_id, int friend_id) {
+int add_friend(Client *client, int user_id, int friend_id) {
     // Check if already friends
     FriendList *list = find_friend_list(user_id);
     if (list != NULL) {
         for (int i = 0; i < list->friend_count; i++) {
             if (list->friend_ids[i] == friend_id) {
-                return -1; // Already friends
+                send_reply_sock(client->socket_fd, 402, MSG_ALREADY_FRIENDS);
+                return -1; 
             }
         }
         
         // Add to existing list
         if (list->friend_count >= MAX_FRIENDS_PER_USER) {
-            return -2; // Too many friends
+            send_reply_sock(client->socket_fd, 405, MSG_TOO_MANY_FRIENDS);
+            return -2;
         }
         
         list->friend_ids[list->friend_count] = friend_id;
         list->friend_count++;
     } else {
         // Create new record
-        if (friend_count >= MAX_FRIENDS) {
-            return -2;
-        }
-        
         friends[friend_count].user_id = user_id;
         friends[friend_count].friend_count = 1;
         friends[friend_count].friend_ids[0] = friend_id;

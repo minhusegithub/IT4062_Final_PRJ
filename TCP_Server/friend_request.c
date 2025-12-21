@@ -198,6 +198,10 @@ void handle_send_friend_request(int client_index, char *args) {
         send_reply_sock(client->socket_fd, 403, MSG_ALREADY_SENT);
         return;
     }
+    // check if already friend and return 402 
+    if(add_friend(client, from_user_id, to_user_id) == -1) {
+        return;
+    }
     
     // Find or create friend request list for target user
     FriendRequestList *list = find_friend_request_list(to_user_id);
@@ -297,7 +301,7 @@ void handle_get_friend_requests(int client_index) {
  * Remove friend request from list
  * @param user_id User ID who received the request
  * @param from_user_id User ID who sent the request
- * @return 0 on success, -1 if not found
+ * @return 0 on success, -1 if not found 
  */
 int remove_friend_request_from_list(int user_id, int from_user_id) {
     FriendRequestList *list = find_friend_request_list(user_id);
@@ -368,34 +372,35 @@ void handle_accept_friend_request(int client_index, char *args) {
         return;
     }
     
-    // Remove delete 2-way from friend_request list
+    // Remove 2-way from friend_request list
     if (remove_friend_request_from_list(current_user_id, friend_user_id) != 0) {
         send_reply_sock(client->socket_fd, 400, MSG_REMOVE_REQ_FAILED);
         return;
     }
-    
+
     if (remove_friend_request_from_list(friend_user_id, current_user_id) != 0) {
-        send_reply_sock(client->socket_fd, 400, MSG_REMOVE_REQ_FAILED);
+       // continue;
+    }
+        
+    // Add to friend list 2-way to friend list
+    if (add_friend(client, current_user_id, friend_user_id) != 0) {
+        
         return;
     }
     
-    // Add to friend list 2-way to friend list
-    if (add_friend(current_user_id, friend_user_id) != 0) {
-        // If already friends, continue
-    }
-    
-    if (add_friend(friend_user_id, current_user_id) != 0) {
-        // If already friends, continue
+    if (add_friend(client, friend_user_id, current_user_id) != 0) {
+        
+        return;
     }
     
     // Save 2 files
     if (save_friend_requests(FRIEND_REQUEST_FILE_PATH) != 0) {
-        send_reply_sock(client->socket_fd, 400, "Server error: failed to save");
+        send_reply_sock(client->socket_fd, 401, "Server error: failed to save file");
         return;
     }
     
     if (save_friends(FRIEND_FILE_PATH) != 0) {
-        send_reply_sock(client->socket_fd, 400, "Server error: failed to save");
+        send_reply_sock(client->socket_fd, 401, "Server error: failed to save file");
         return;
     }
     
@@ -450,7 +455,7 @@ void handle_reject_friend_request(int client_index, char *args) {
         return;
     }
     
-    // Remove from friend_request list
+    // Remove 1-way from friend_request list
     if (remove_friend_request_from_list(current_user_id, friend_user_id) != 0) {
         send_reply_sock(client->socket_fd, 400, MSG_REMOVE_REQ_FAILED);
         return;
@@ -458,7 +463,7 @@ void handle_reject_friend_request(int client_index, char *args) {
     
     // Save friend_request file
     if (save_friend_requests(FRIEND_REQUEST_FILE_PATH) != 0) {
-        send_reply_sock(client->socket_fd, 400, "Server error: failed to save");
+        send_reply_sock(client->socket_fd, 401, "Server error: failed to save file");
         return;
     }
     
