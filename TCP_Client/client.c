@@ -2,6 +2,7 @@
 #include "account.h"
 #include "location.h"
 #include "friend_request.h"
+#include "friend.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -93,8 +94,9 @@ int main(int argc, char *argv[])
         printf("10. View Friend Requests\n");
         printf("11. Accept Friend Request\n");
         printf("12. Reject Friend Request\n");
-        printf("13. Exit\n");
-        printf("Your choice (1-13): ");
+        printf("13. Get Friends List\n");
+        printf("14. Exit\n");
+        printf("Your choice (1-14): ");
         if (!fgets(line, sizeof(line), stdin))
             break;
         int choice = atoi(line);
@@ -150,13 +152,17 @@ int main(int argc, char *argv[])
         }
         else if (choice == 13)
         {
+            do_get_friends_list(sock_fd);
+        }
+        else if (choice == 14)
+        {
             if (logged_in)
                 do_logout(sock_fd);
             printf("Goodbye!\n");
             break;
         }
         else
-            printf("Invalid choice. Please enter 1-7.\n");
+            printf("Invalid choice. Please enter 1-14.\n");
     }
 
     close(sock_fd);

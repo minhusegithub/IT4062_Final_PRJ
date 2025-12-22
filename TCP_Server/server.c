@@ -179,6 +179,10 @@ void handle_message(int client_index, const char *message)
     {
         handle_reject_friend_request(client_index, args);
     }
+    else if (strcmp(command, REQ_GET_FRIENDS) == 0)
+    {
+        handle_get_friends(client_index);
+    }
     else
     {
         send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_COMMAND);

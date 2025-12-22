@@ -10,6 +10,13 @@
 #define MSG_ALREADY_FRIENDS "Already friends"
 #define MSG_TOO_MANY_FRIENDS "Too many friends"
 
+// Request command
+#define REQ_GET_FRIENDS "GET_FRIENDS"
+
+// Response messages
+#define MSG_GET_FRIENDS_SUCCESS "Get friends list successfully"
+#define MSG_NO_FRIENDS "You have no friends"
+
 // Structure to store friends for a user
 typedef struct {
     int user_id;
@@ -26,6 +33,7 @@ int load_friends(const char *filename);
 int save_friends(const char *filename);
 FriendList* find_friend_list(int user_id);
 int add_friend(Client *client, int user_id, int friend_id);
+void handle_get_friends(int client_index);
 
 #endif // FRIEND_H
 

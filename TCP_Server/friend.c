@@ -164,4 +164,56 @@ int add_friend(Client *client, int user_id, int friend_id) {
     return 0;
 }
 
+/**
+ * Handle GET_FRIENDS command
+ * @param client_index Client index in clients array
+ */
+void handle_get_friends(int client_index) {
+    Client *client = &clients[client_index];
+    
+    // Check login (221 if not logged in)
+    if (check_login(client_index) == 0) {
+        return;
+    }
+    
+    int user_id = client->user_id;
+    
+    // Find friend list for current user
+    FriendList *list = find_friend_list(user_id);
+    if (list == NULL || list->friend_count == 0) {
+        send_reply_sock(client->socket_fd, 130, MSG_NO_FRIENDS);
+        return;
+    }
+    
+    char final_msg[4096 + strlen(MSG_GET_FRIENDS_SUCCESS) + 1];
+    char buffer[4096] = "";
+    char line[256];
+    
+    snprintf(buffer, sizeof(buffer), "%d %s:", list->friend_count, "friends");
+    
+    for (int i = 0; i < list->friend_count; i++) {
+        int friend_user_id = list->friend_ids[i];
+        
+        // Find username corresponding to friend_user_id
+        const char *username = "Unknown";
+        for (int j = 0; j < account_count; j++) {
+            if (accounts[j].user_id == friend_user_id) {
+                username = accounts[j].username;
+                break;
+            }
+        }
+        
+        snprintf(line, sizeof(line), "\n%d. %s (id=%d)", i + 1, username, friend_user_id);
+        
+        // Avoid buffer overflow
+        if (strlen(buffer) + strlen(line) + 2 >= sizeof(buffer)) {
+            break;
+        }
+        
+        strcat(buffer, line);
+    }
+    
+    snprintf(final_msg, sizeof(final_msg), "%s\n%s", MSG_GET_FRIENDS_SUCCESS, buffer);
+    send_reply_sock(client->socket_fd, 130, final_msg);
+}
 
