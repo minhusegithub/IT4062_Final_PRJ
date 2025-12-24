@@ -81,22 +81,28 @@ int main(int argc, char *argv[])
 
     while (1)
     {
-        printf("----------------MENU----------------\n");
-        printf("1. Login\n");
-        printf("2. Register\n");
-        printf("3. Logout\n");
-        printf("4. Add Location\n");
-        printf("5. View Locations\n");
-        printf("6. View My Locations\n");
-        printf("7. Update Location\n");
-        printf("8. Delete Location\n");
-        printf("9. Send Friend Request\n");
-        printf("10. View Friend Requests\n");
-        printf("11. Accept Friend Request\n");
-        printf("12. Reject Friend Request\n");
-        printf("13. Get Friends List\n");
-        printf("14. Exit\n");
-        printf("Your choice (1-14): ");
+        printf("\n=========================================\n");
+        printf("               MAIN MENU                 \n");
+        printf("=========================================\n");
+
+        printf(" [Account]\n");
+        printf("   1. Login            2. Register\n");
+        printf("   3. Logout\n\n");
+
+        printf(" [Location]\n");
+        printf("   4. Add Location     5. View Locations\n");
+        printf("   6. My Locations     7. Update Location\n");
+        printf("   8. Delete Location\n\n");
+
+        printf(" [Friend]\n");
+        printf("   9. Send Request     10. View Requests\n");
+        printf("  11. Accept Request   12. Reject Request\n");
+        printf("  13. Friends List\n\n");
+
+        printf("  14. Exit\n");
+        printf("-----------------------------------------\n");
+        printf("--> Your choice (1-14): ");
+
         if (!fgets(line, sizeof(line), stdin))
             break;
         int choice = atoi(line);
