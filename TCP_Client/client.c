@@ -92,16 +92,18 @@ int main(int argc, char *argv[])
         printf(" [Location]\n");
         printf("   4. Add Location     5. View Locations\n");
         printf("   6. My Locations     7. Update Location\n");
-        printf("   8. Delete Location\n\n");
+        printf("   8. Delete Location  9. Save to Favorites\n");
+        printf("   10. My Favorites\n\n");
+
 
         printf(" [Friend]\n");
-        printf("   9. Send Request     10. View Requests\n");
-        printf("  11. Accept Request   12. Reject Request\n");
-        printf("  13. Friends List\n\n");
+        printf("   11. Send Request    12. View Requests\n");
+        printf("  13. Accept Request   14. Reject Request\n");
+        printf("  15. Friends List     16. Unfriend\n\n");
 
-        printf("  14. Exit\n");
+        printf("  17. Exit\n");
         printf("-----------------------------------------\n");
-        printf("--> Your choice (1-14): ");
+        printf("--> Your choice (1-17): ");
 
         if (!fgets(line, sizeof(line), stdin))
             break;
@@ -140,27 +142,39 @@ int main(int argc, char *argv[])
         {
             do_delete_location(sock_fd);
         }
-        else if (choice == 9)
+        else if (choice == 9) 
         {
-            do_send_friend_request(sock_fd);
+            do_save_favorite(sock_fd);
         }
         else if (choice == 10)
         {
-            do_get_friend_requests(sock_fd);
+            do_view_favorite_locations(sock_fd);
         }
         else if (choice == 11)
         {
-            do_accept_friend_request(sock_fd);
+            do_send_friend_request(sock_fd);
         }
         else if (choice == 12)
         {
-            do_reject_friend_request(sock_fd);
+            do_get_friend_requests(sock_fd);
         }
         else if (choice == 13)
         {
-            do_get_friends_list(sock_fd);
+            do_accept_friend_request(sock_fd);
         }
         else if (choice == 14)
+        {
+            do_reject_friend_request(sock_fd);
+        }
+        else if (choice == 15)
+        {
+            do_get_friends_list(sock_fd);
+        }
+        else if (choice == 16)
+        {
+            do_unfriend(sock_fd);
+        }
+        else if (choice == 17)
         {
             if (logged_in)
                 do_logout(sock_fd);
@@ -168,7 +182,7 @@ int main(int argc, char *argv[])
             break;
         }
         else
-            printf("Invalid choice. Please enter 1-14.\n");
+            printf("Invalid choice. Please enter 1-17.\n");
     }
 
     close(sock_fd);

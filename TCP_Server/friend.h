@@ -12,10 +12,13 @@
 
 // Request command
 #define REQ_GET_FRIENDS "GET_FRIENDS"
+#define REQ_UNFRIEND "UNFRIEND"
 
 // Response messages
 #define MSG_GET_FRIENDS_SUCCESS "Get friends list successfully"
 #define MSG_NO_FRIENDS "You have no friends"
+#define MSG_UNFRIEND_SUCCESS "Unfriend successful"
+#define MSG_NOT_FRIEND "User is not your friend"
 
 // Structure to store friends for a user
 typedef struct {
@@ -34,6 +37,7 @@ int save_friends(const char *filename);
 FriendList* find_friend_list(int user_id);
 int add_friend(Client *client, int user_id, int friend_id);
 void handle_get_friends(int client_index);
+void handle_unfriend(int client_index, char *args);
 
 #endif // FRIEND_H
 

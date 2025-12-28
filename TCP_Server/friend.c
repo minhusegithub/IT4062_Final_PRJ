@@ -216,4 +216,61 @@ void handle_get_friends(int client_index) {
     snprintf(final_msg, sizeof(final_msg), "%s\n%s", MSG_GET_FRIENDS_SUCCESS, buffer);
     send_reply_sock(client->socket_fd, 130, final_msg);
 }
+/**
+ * Helper function: Remove friend_id from user_id's list (One way)
+ * @return 0 on success, -1 if not found
+ */
+int remove_friend_one_way(int user_id, int friend_id) {
+    FriendList *list = find_friend_list(user_id);
+    if (list == NULL) return -1;
+
+    int found = 0;
+    for (int i = 0; i < list->friend_count; i++) {
+        if (list->friend_ids[i] == friend_id) {
+            // Dồn mảng để xóa phần tử tại vị trí i
+            for (int j = i; j < list->friend_count - 1; j++) {
+                list->friend_ids[j] = list->friend_ids[j + 1];
+            }
+            list->friend_count--;
+            found = 1;
+            break;
+        }
+    }
+    return (found) ? 0 : -1;
+}
+
+/**
+ * Handle UNFRIEND request
+ * @param client_index Client index
+ * @param args Argument string containing friend's user_id
+ */
+void handle_unfriend(int client_index, char *args) {
+    // 1. Kiểm tra đăng nhập
+    if (check_login(client_index) == 0) return;
+
+    // 2. Parse ID người muốn hủy kết bạn
+    if (!args || strlen(args) == 0) {
+        send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_COMMAND);
+        return;
+    }
+    int friend_id = atoi(args);
+    int my_id = clients[client_index].user_id;
+
+    // 3. Thực hiện xóa 2 chiều
+    // Xóa friend_id khỏi danh sách của tôi
+    int res1 = remove_friend_one_way(my_id, friend_id);
+    
+    // Xóa tôi khỏi danh sách của friend_id
+    int res2 = remove_friend_one_way(friend_id, my_id);
+
+    if (res1 == -1 || res2 == -1) {
+        // Chưa kết bạn
+        send_reply_sock(clients[client_index].socket_fd, 405, MSG_NOT_FRIEND);
+    } else {
+        // 4. Lưu lại file
+        save_friends(FRIEND_FILE_PATH);
+        send_reply_sock(clients[client_index].socket_fd, 160, MSG_UNFRIEND_SUCCESS);
+    }
+}
+
 

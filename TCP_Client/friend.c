@@ -20,3 +20,29 @@ void do_get_friends_list(int sock) {
 
     printf("Server send: %s\n", response);
 }
+
+/**
+ * Unfriend a user by their ID
+ * @param sock Socket descriptor
+ */
+void do_unfriend(int sock) {
+    char id_str[20], out[MAX_LINE], response[MAX_LINE];
+    
+    printf("\n--- Unfriend ---\n");
+    printf("Enter Friend's User ID to unfriend: ");
+    if (!fgets(id_str, sizeof(id_str), stdin)) return;
+    trim(id_str); 
+
+    if (strlen(id_str) == 0) {
+        printf("ID cannot be empty\n");
+        return;
+    }
+
+    // Format: UNFRIEND <id>
+    snprintf(out, sizeof(out), "%s %s", REQ_UNFRIEND, id_str);
+    send_to_server(sock, out);
+
+    if (receive_line(sock, response, sizeof(response)) > 0) {
+        printf("Server: %s\n", response);
+    }
+}

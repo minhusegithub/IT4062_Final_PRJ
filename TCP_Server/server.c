@@ -3,6 +3,7 @@
 #include "location.h"
 #include "friend_request.h"
 #include "friend.h"
+#include "favorite.h"
 
 #define BACKLOG 20
 
@@ -183,6 +184,19 @@ void handle_message(int client_index, const char *message)
     {
         handle_get_friends(client_index);
     }
+    else if (strcmp(command, REQ_SAVE_TO_FAV_LOCATION) == 0)
+    {
+        // args chứa ID địa điểm
+        handle_save_favorite(client_index, args);
+    }
+    else if (strcmp(command, REQ_VIEW_FAVORITE_LOCATIONS) == 0)
+    {
+        handle_view_favorite_locations(client_index);
+    }
+    else if (strcmp(command, REQ_UNFRIEND) == 0)
+    {
+        handle_unfriend(client_index, args);
+    }
     else
     {
         send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_COMMAND);
@@ -232,13 +246,20 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Warning: Failed to load friend requests or file empty\n");
     }
     printf("Loaded %d friend_requests\n", friend_request_count);
-    
+
     // Load friends
     if (load_friends(FRIEND_FILE_PATH) < 0)
     {
         fprintf(stderr, "Warning: Failed to load friends or file empty\n");
     }
     printf("Loaded %d friends \n", friend_count);
+
+    // Load favorites
+    if (load_favorites(FAVORITE_FILE_PATH) < 0)
+    {
+        fprintf(stderr, "Warning: Failed to load favorites\n");
+    }
+    printf("Loaded favorites for %d users\n", favorite_count);
 
     // Step 1: Construct TCP Socket
     int listenfd = socket(AF_INET, SOCK_STREAM, 0);

@@ -252,3 +252,75 @@ void do_view_my_locations(int sock)
         printf("%s\n", response);
     }
 }
+
+/**
+ * Send request to save a location to favorites
+ * @param sock Socket descriptor
+ */
+void do_save_favorite(int sock) {
+    char id_str[20], out[MAX_LINE], response[MAX_LINE];
+
+    printf("\n--- Save Location to Favorites ---\n");
+    
+    // 1. Nhập ID địa điểm cần lưu
+    printf("Enter Location ID to save: ");
+    if (!fgets(id_str, sizeof(id_str), stdin)) return;
+    trim(id_str);
+
+    if (strlen(id_str) == 0) {
+        printf("Error: ID cannot be empty.\n");
+        return;
+    }
+
+    // 2. Đóng gói lệnh: SAVE_TO_FAV_LOCATION <id>
+    int n = snprintf(out, sizeof(out), "%s %s", REQ_SAVE_TO_FAV_LOCATION, id_str);
+    if (n < 0 || (size_t)n >= sizeof(out)) {
+        printf("Error: Input too long.\n");
+        return;
+    }
+
+    // 3. Gửi lệnh lên server và nhận phản hồi
+    send_to_server(sock, out);
+
+    if (receive_line(sock, response, sizeof(response)) > 0) {
+        printf("Server: %s\n", response);
+    }
+}
+
+/**
+ * Send request to view favorite locations
+ * @param sock Socket descriptor
+ */
+void do_view_favorite_locations(int sock) {
+    char out[MAX_LINE];
+    char response[4096];
+
+    printf("\n--- My Favorite Locations ---\n");
+
+    // 1. Gửi lệnh VIEW_FAVORITE_LOCATIONS (không cần tham số)
+    snprintf(out, sizeof(out), "%s", REQ_VIEW_FAVORITE_LOCATIONS);
+    send_to_server(sock, out);
+
+    // 2. Nhận dòng đầu tiên (Header hoặc mã lỗi)
+    if (receive_line(sock, response, sizeof(response)) <= 0)
+        return;
+    
+    printf("%s\n", response);
+
+    // Kiểm tra mã phản hồi, nếu không phải 110 (Success) thì dừng
+    int code = atoi(response);
+    if (code != 110) return;
+
+    // 3. Vòng lặp nhận danh sách chi tiết cho đến khi gặp END_DATA
+    while (1)
+    {
+        int n = receive_line(sock, response, sizeof(response));
+        if (n <= 0) break;
+
+        if (strstr(response, MSG_END_DATA) != NULL)
+        {
+            break;
+        }
+        printf("%s\n", response);
+    }
+}
