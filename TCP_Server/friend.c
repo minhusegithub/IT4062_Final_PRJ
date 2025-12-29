@@ -181,9 +181,9 @@ void handle_get_friends(int client_index) {
     // Find friend list for current user
     FriendList *list = find_friend_list(user_id);
     if (list == NULL || list->friend_count == 0) {
-        send_reply_sock(client->socket_fd, 130, MSG_NO_FRIENDS);
+        send_reply_sock(client->socket_fd, 222 , MSG_NO_FRIENDS);
         return;
-    }
+    } 
     
     char final_msg[4096 + strlen(MSG_GET_FRIENDS_SUCCESS) + 1];
     char buffer[4096] = "";
