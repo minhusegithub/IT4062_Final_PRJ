@@ -4,6 +4,7 @@
 #include "friend_request.h"
 #include "friend.h"
 #include "favorite.h"
+#include "shared_location.h"
 
 #define BACKLOG 20
 
@@ -197,6 +198,14 @@ void handle_message(int client_index, const char *message)
     {
         handle_unfriend(client_index, args);
     }
+    else if (strcmp(command, REQ_SHARE_LOCATION) == 0)
+    {
+        handle_share_location(client_index, args);
+    }
+    else if (strcmp(command, REQ_GET_SHARED_LOCATIONS) == 0)
+    {
+        handle_get_shared_locations(client_index);
+    }
     else
     {
         send_reply_sock(clients[client_index].socket_fd, 300, MSG_INVALID_COMMAND);
@@ -260,6 +269,13 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Warning: Failed to load favorites\n");
     }
     printf("Loaded favorites for %d users\n", favorite_count);
+
+    // Load shared locations
+    if (load_shared_locations(SHARED_FILE_PATH) < 0)
+    {
+        fprintf(stderr, "Warning: Failed to load shared locations\n");
+    }
+    printf("Loaded shared lists for %d users\n", shared_count);
 
     // Step 1: Construct TCP Socket
     int listenfd = socket(AF_INET, SOCK_STREAM, 0);

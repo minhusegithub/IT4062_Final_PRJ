@@ -1,0 +1,27 @@
+Đề tài:Xây dựng ứng dụng quản lý danh mục địa điểm
+
+Ứng dụng có các chức năng sau sau:
+- Đăng ký tài khoản mới
+- Đăng nhập vào tài khoản để sử dụng
+- Cho phép người dùng lưu các địa điểm yêu thích. Gợi ý các loại danh mục: Cửa hàng ăn uống, Cửa hàng cà phê, Rạp phim, Cửa hàng thời trang…
+- Đồng bộ danh mục với server
+- Cho phép người dùng chia sẻ địa điểm với bạn bè: Người dùng tag tên bạn bè vào địa điểm cần chia sẻ. Mỗi khi người dùng đăng nhập, server gửi thông báo có địa điểm mới do bạn bè chia sẻ để người dùng lưu vào danh mục cá nhân. Lưu ý, khi hiển thị danh mục cần có dấu hiệu phân biệt địa điểm nào là do bạn bè chia sẻ.
+
+Tiêu chí chấm điểm:
+- Xử lý truyền dòng: 1 điểm
+- Cài đặt cơ chế vào/ra socket trên server: 2 điểm
+- Đăng ký và quản lý tài khoản: 2 điểm
+- Đăng nhập và quản lý phiên: 2 điểm
+- Lấy danh sách địa điểm yêu thích: 1 điểm
+- Lưu địa điểm yêu thích: 2 điểm
+- Sửa thông tin địa điểm: 1 điểm
+- Xóa thông tin địa điểm : 1 điểm
+- Gửi lời mời kết bạn: 1 điểm
+- Chấp nhận/Từ chối lời mời kết bạn: 1 điểm
+- Hủy kết bạn: 1 điểm
+- Hiển thị danh sách bạn bè: 1 điểm
+- Tag bạn bè vào địa điểm cần chia sẻ: 2 điểm
+- Nhận danh sách các địa điểm được bạn bè tag: 1 điểm
+- Ghi log hoạt động: 1 điểm
+
+

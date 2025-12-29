@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "shared_location.h"
 
 // Global variables
 Account accounts[MAX_ACCOUNT];
@@ -199,7 +200,21 @@ void handle_login(int client_index,  char *args ) {
     client->user_id = account->user_id;
     client->is_logged_in = 1;
 
-    send_reply_sock(client->socket_fd, 110, MSG_LOGIN_SUCCESS);
+    //  thông báo có địa điểm mới do bạn bè chia sẻ khi login thành công
+    SharedList *s_list = find_shared_list(account->user_id);
+    
+    if (s_list && s_list->count > 0) {
+        char notify_msg[256];
+        // Thông báo có địa điểm mới
+        snprintf(notify_msg, sizeof(notify_msg), 
+                 "Login successful. You have %d new shared locations! Check 'Shared With Me'.", 
+                 s_list->count);
+        send_reply_sock(client->socket_fd, 110, notify_msg);
+    } else {
+        // Không có chia sẻ, thông báo bình thường
+        send_reply_sock(client->socket_fd, 110, MSG_LOGIN_SUCCESS);
+    }
+
 }
 
 /**

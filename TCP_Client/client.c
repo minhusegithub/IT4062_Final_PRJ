@@ -3,6 +3,7 @@
 #include "location.h"
 #include "friend_request.h"
 #include "friend.h"
+#include "shared_location.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -95,15 +96,17 @@ int main(int argc, char *argv[])
         printf("   8. Delete Location  9. Save to Favorites\n");
         printf("   10. My Favorites\n\n");
 
-
         printf(" [Friend]\n");
         printf("   11. Send Request    12. View Requests\n");
         printf("  13. Accept Request   14. Reject Request\n");
         printf("  15. Friends List     16. Unfriend\n\n");
 
-        printf("  17. Exit\n");
+        printf(" [Share]\n");
+        printf("   18. Share Location  19. Shared With Me\n\n");
+
+        printf("  20. Exit\n");
         printf("-----------------------------------------\n");
-        printf("--> Your choice (1-17): ");
+        printf("--> Your choice (1-20): ");
 
         if (!fgets(line, sizeof(line), stdin))
             break;
@@ -131,18 +134,19 @@ int main(int argc, char *argv[])
         {
             do_get_locations(sock_fd);
         }
-        else if (choice == 6) {         
+        else if (choice == 6)
+        {
             do_view_my_locations(sock_fd);
         }
-        else if (choice == 7) 
+        else if (choice == 7)
         {
             do_update_location(sock_fd);
         }
-        else if (choice == 8) 
+        else if (choice == 8)
         {
             do_delete_location(sock_fd);
         }
-        else if (choice == 9) 
+        else if (choice == 9)
         {
             do_save_favorite(sock_fd);
         }
@@ -174,7 +178,15 @@ int main(int argc, char *argv[])
         {
             do_unfriend(sock_fd);
         }
-        else if (choice == 17)
+        else if (choice == 18)
+        {
+            do_share_location(sock_fd);
+        }
+        else if (choice == 19)
+        {
+            do_get_shared_locations(sock_fd);
+        }
+        else if (choice == 20)
         {
             if (logged_in)
                 do_logout(sock_fd);
