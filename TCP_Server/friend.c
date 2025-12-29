@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "log_system.h"
 
 // Global variables
 FriendList friends[MAX_FRIENDS];
@@ -269,6 +270,21 @@ void handle_unfriend(int client_index, char *args) {
     } else {
         // 4. Lưu lại file
         save_friends(FRIEND_FILE_PATH);
+
+        // 5. Ghi log hoạt động
+        char friend_name[100] = "Unknown";
+        for (int i = 0; i < account_count; i++) {
+            if (accounts[i].user_id == friend_id) {
+                strncpy(friend_name, accounts[i].username, sizeof(friend_name) - 1);
+                friend_name[sizeof(friend_name) - 1] = '\0';
+                break;
+            }
+        }
+        
+        char log_msg[200];
+        snprintf(log_msg, sizeof(log_msg), "Unfriended: %s (ID:%d)", friend_name, friend_id);
+        log_activity(client_index, "UNFRIEND", log_msg);
+
         send_reply_sock(clients[client_index].socket_fd, 160, MSG_UNFRIEND_SUCCESS);
     }
 }

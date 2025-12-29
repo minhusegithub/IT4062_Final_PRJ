@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "log_system.h"
 
 SharedList shared_lists[MAX_SHARED_LISTS];
 int shared_count = 0;
@@ -183,6 +184,12 @@ void handle_share_location(int client_index, char *args) {
 
     // 7. Lưu file và phản hồi thành công (Mã 120)
     save_shared_locations(SHARED_FILE_PATH);
+
+    // 8. Ghi log hoạt động
+    char log_msg[200];
+    snprintf(log_msg, sizeof(log_msg), "Shared LocID %d to User %s", loc_id, friend_name);
+    log_activity(client_index, "SHARE_LOCATION", log_msg);
+
     send_reply_sock(clients[client_index].socket_fd, 120, MSG_SHARE_SUCCESS);
 }
 

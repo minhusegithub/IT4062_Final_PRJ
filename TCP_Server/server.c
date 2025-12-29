@@ -5,6 +5,7 @@
 #include "friend.h"
 #include "favorite.h"
 #include "shared_location.h"
+#include "log_system.h"
 
 #define BACKLOG 20
 
@@ -314,6 +315,8 @@ int main(int argc, char *argv[])
     }
     printf("Server listening on port %d\n", port);
 
+    log_system("Server started");
+
     // Initialize for select()
     int i, maxi, maxfd, connfd, sockfd;
     int nready;
@@ -361,8 +364,8 @@ int main(int argc, char *argv[])
                 continue;
             }
 
-            printf("New client connected: %s:%d\n",
-                   inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
+            // printf("New client connected: %s:%d\n",
+            //        inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
 
             // Find available slot in client array
             for (i = 0; i < FD_SETSIZE; i++)
@@ -373,6 +376,8 @@ int main(int argc, char *argv[])
                     clients[i].address = cliaddr;
                     clients[i].user_id = -1;
                     clients[i].is_logged_in = 0;
+
+                    log_activity(i, "CONNECTION", "New client connected");
 
                     break;
                 }
@@ -425,6 +430,9 @@ int main(int argc, char *argv[])
                     {
                         printf("Client disconnected: socket_fd=%d, user_id=%d\n",
                                clients[i].socket_fd, clients[i].user_id);
+                        log_activity(i, "DISCONNECT", "Client disconnected normally");
+                    } else {
+                        log_activity(i, "DISCONNECT", "Connection error");
                     }
                     close(sockfd);
                     FD_CLR(sockfd, &allset); // turn off the bit for fd in fdset

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "log_system.h"
 
 // Biến toàn cục để lưu danh sách địa điểm
 Location locations[MAX_LOCATIONS];
@@ -114,8 +115,9 @@ void handle_add_location(int client_index, char *args)
 {
 
     // 1. Kiểm tra xem user đã đăng nhập chưa
-    if (check_login(client_index) == 0) {
-        return; 
+    if (check_login(client_index) == 0)
+    {
+        return;
     }
 
     // 2. Tách các tham số từ chuỗi args (Name|Address|Category|Description)
@@ -170,6 +172,7 @@ void handle_add_location(int client_index, char *args)
     // 4. Lưu ngay xuống file để đảm bảo dữ liệu không bị mất
     if (save_locations(LOCATION_FILE_PATH) == 0)
     {
+        log_activity(client_index, "ADD_LOCATION", name);
         send_reply_sock(clients[client_index].socket_fd, 120, MSG_ADD_SUCCESS);
     }
     else
@@ -187,8 +190,9 @@ void handle_get_locations(int client_index, char *category)
 {
 
     // Kiểm tra xem user đã đăng nhập chưa
-    if (check_login(client_index) == 0) {
-        return; 
+    if (check_login(client_index) == 0)
+    {
+        return;
     }
 
     if (!check_category_valid(category))
@@ -277,7 +281,6 @@ int check_category_valid(char *category)
     return 0;
 }
 
-
 /**
  * Handle UPDATE_LOCATION request from client
  * @param client_index Index of the client in the global clients array
@@ -286,8 +289,9 @@ int check_category_valid(char *category)
 void handle_update_location(int client_index, char *args)
 {
     // 1. Kiểm tra đăng nhập
-    if (check_login(client_index) == 0) {
-        return; 
+    if (check_login(client_index) == 0)
+    {
+        return;
     }
 
     // 2. Tách các tham số: id|name|addr|cat|desc
@@ -338,8 +342,9 @@ void handle_update_location(int client_index, char *args)
     int found_cat = 0;
     for (int i = 0; i < MAX_CATEGORY_ENUM; i++)
     {
-        if (categories[i][0] == '\0') break;
-        
+        if (categories[i][0] == '\0')
+            break;
+
         // So sánh không phân biệt hoa thường
         if (strcasecmp(cat, categories[i]) == 0)
         {
@@ -363,6 +368,9 @@ void handle_update_location(int client_index, char *args)
     // 7. Lưu lại xuống file
     if (save_locations(LOCATION_FILE_PATH) == 0)
     {
+        char log_msg[100];
+        snprintf(log_msg, sizeof(log_msg), "Updated LocID: %d", locations[found_idx].location_id);
+        log_activity(client_index, "UPDATE_LOCATION", log_msg);
         send_reply_sock(clients[client_index].socket_fd, 130, MSG_UPDATE_SUCCESS);
     }
     else
@@ -379,8 +387,9 @@ void handle_update_location(int client_index, char *args)
 void handle_delete_location(int client_index, char *args)
 {
     // 1. Kiểm tra đăng nhập
-    if (check_login(client_index) == 0) {
-        return; 
+    if (check_login(client_index) == 0)
+    {
+        return;
     }
 
     // 2. Lấy ID địa điểm từ tham số
@@ -415,7 +424,7 @@ void handle_delete_location(int client_index, char *args)
         return;
     }
 
-    // 5. Xóa khỏi bộ nhớ 
+    // 5. Xóa khỏi bộ nhớ
     for (int i = found_idx; i < location_count - 1; i++)
     {
         locations[i] = locations[i + 1];
@@ -425,6 +434,10 @@ void handle_delete_location(int client_index, char *args)
     // 6. Lưu danh sách mới xuống file
     if (save_locations(LOCATION_FILE_PATH) == 0)
     {
+        char log_msg[100];
+        snprintf(log_msg, sizeof(log_msg), "Deleted LocID: %d", loc_id);
+        log_activity(client_index, "DELETE_LOCATION", log_msg);
+
         send_reply_sock(clients[client_index].socket_fd, 140, MSG_DELETE_SUCCESS);
     }
     else
@@ -439,8 +452,9 @@ void handle_delete_location(int client_index, char *args)
  */
 void handle_view_my_locations(int client_index)
 {
-    if (check_login(client_index) == 0) {
-        return; 
+    if (check_login(client_index) == 0)
+    {
+        return;
     }
 
     char buffer[4096] = "";
@@ -474,9 +488,12 @@ void handle_view_my_locations(int client_index)
 
     // Gửi phản hồi
     char header[100];
-    if (found > 0) {
+    if (found > 0)
+    {
         snprintf(header, sizeof(header), "Your locations (%d):", found);
-    } else {
+    }
+    else
+    {
         snprintf(header, sizeof(header), "You haven't added any locations yet.");
     }
 
@@ -487,7 +504,7 @@ void handle_view_my_locations(int client_index)
         send_reply_sock(clients[client_index].socket_fd, 110, final_msg);
         free(final_msg);
     }
-    
+
     // Gửi tín hiệu kết thúc dữ liệu
     send_reply_sock(clients[client_index].socket_fd, 110, MSG_END_DATA);
 }

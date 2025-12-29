@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "log_system.h"
 
 // Global variables definition
 FavoriteList favorites[MAX_FAV_LISTS];
@@ -201,6 +202,10 @@ void handle_save_favorite(int client_index, char *args)
     // 5. Lưu xuống file và phản hồi kết quả
     if (save_favorites(FAVORITE_FILE_PATH) == 0)
     {
+        char log_msg[100];
+        snprintf(log_msg, sizeof(log_msg), "Saved LocID: %d", loc_id);
+        log_activity(client_index, "SAVE_FAVORITE", log_msg);
+        
         send_reply_sock(clients[client_index].socket_fd, 150, MSG_SAVE_FAV_SUCCESS);
     }
     else
@@ -213,9 +218,11 @@ void handle_save_favorite(int client_index, char *args)
  * Handle VIEW_FAVORITE_LOCATIONS request
  * @param client_index Index of the client in the global clients array
  */
-void handle_view_favorite_locations(int client_index) {
+void handle_view_favorite_locations(int client_index)
+{
     // 1. Kiểm tra đăng nhập
-    if (check_login(client_index) == 0) {
+    if (check_login(client_index) == 0)
+    {
         return;
     }
 
@@ -223,7 +230,8 @@ void handle_view_favorite_locations(int client_index) {
     FavoriteList *list = find_favorite_list(user_id);
 
     // 2. Kiểm tra xem có danh sách yêu thích không
-    if (list == NULL || list->count == 0) {
+    if (list == NULL || list->count == 0)
+    {
         send_reply_sock(clients[client_index].socket_fd, 222, MSG_NO_FAVORITE);
         return;
     }
@@ -233,22 +241,26 @@ void handle_view_favorite_locations(int client_index) {
     int found_count = 0;
 
     // 3. Duyệt qua danh sách ID yêu thích
-    for (int i = 0; i < list->count; i++) {
+    for (int i = 0; i < list->count; i++)
+    {
         int loc_id = list->location_ids[i];
-        
+
         // 4. Tìm chi tiết địa điểm trong mảng locations toàn cục
         // (Biến locations và location_count được extern từ location.h)
-        for (int j = 0; j < location_count; j++) {
-            if (locations[j].location_id == loc_id) {
-                
+        for (int j = 0; j < location_count; j++)
+        {
+            if (locations[j].location_id == loc_id)
+            {
+
                 // Format: ID. Name - Address (Category)
                 snprintf(line_buff, sizeof(line_buff), "\n%d. %s - %s (%s)",
                          locations[j].location_id,
                          locations[j].name,
                          locations[j].address,
                          locations[j].category);
-                
-                if (strlen(buffer) + strlen(line_buff) < sizeof(buffer) - 1) {
+
+                if (strlen(buffer) + strlen(line_buff) < sizeof(buffer) - 1)
+                {
                     strcat(buffer, line_buff);
                     found_count++;
                 }
@@ -258,19 +270,23 @@ void handle_view_favorite_locations(int client_index) {
     }
 
     // 5. Gửi phản hồi về Client
-    if (found_count > 0) {
+    if (found_count > 0)
+    {
         char header[100];
         snprintf(header, sizeof(header), "%s (%d):", MSG_FAV_READ_SUCCESS, found_count);
-        
+
         char *final_msg = malloc(strlen(header) + strlen(buffer) + 1);
-        if (final_msg) {
+        if (final_msg)
+        {
             sprintf(final_msg, "%s%s", header, buffer);
             send_reply_sock(clients[client_index].socket_fd, 110, final_msg);
             free(final_msg);
         }
         // Gửi tín hiệu kết thúc danh sách
         send_reply_sock(clients[client_index].socket_fd, 110, MSG_END_DATA);
-    } else {
+    }
+    else
+    {
         // Trường hợp có ID trong list nhưng không tìm thấy trong locations (ví dụ location đã bị xóa)
         send_reply_sock(clients[client_index].socket_fd, 222, MSG_NO_FAVORITE);
     }

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "shared_location.h"
+#include "log_system.h"
 
 // Global variables
 Account accounts[MAX_ACCOUNT];
@@ -143,6 +144,9 @@ void handle_register(int client_index,  char *args ){
     
     fclose(file);
     account_count++;
+
+    log_activity(client_index, "REGISTER", username);
+
     send_reply_sock(client->socket_fd, 130, MSG_REGISTER_SUCCESS);
     return;
 }
@@ -158,6 +162,8 @@ void handle_logout(int client_index ,  char *args) {
     if(check_login(client_index) == 0){
         return;
     };
+
+    log_activity(client_index, "LOGOUT", "User logged out");
     
     client->is_logged_in = 0;
     client->user_id = -1;
@@ -199,6 +205,8 @@ void handle_login(int client_index,  char *args ) {
     
     client->user_id = account->user_id;
     client->is_logged_in = 1;
+
+    log_activity(client_index, "LOGIN", "Login successful");
 
     //  thông báo có địa điểm mới do bạn bè chia sẻ khi login thành công
     SharedList *s_list = find_shared_list(account->user_id);

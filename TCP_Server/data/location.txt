@@ -8,3 +8,4 @@
 8|4|Banh Mi Phuong|2B Phan Chau Trinh, Hoi An|restaurant|Banh mi ngon nhat the gioi
 9|2|Trung Nguyen Legend|12 Ly Thuong Kiet, Hoan Kiem, HN|cafe|Ca phe nang luong cho nguoi khoi nghiep
 10|5|Galaxy Cinema Nguyen Du|116 Nguyen Du, Q1, HCM|cinema|Rap phim gia re cho sinh vien
+11|1|Quán xôi xéo|123 Đại Cồ Việt|restaurant|Xôi xéo ngon nhất Bách Khoa
