@@ -35,7 +35,8 @@ int receive_line(int sockfd, char *buf, size_t bufsz)
         {
             if (buf[idx - 1] == '\r' && buf[idx] == '\n')
             {
-                buf[idx - 1] = '\0';
+                buf[idx] = '\0';
+                trim_CRLF(buf);
 
                 return (int)strlen(buf);
             }

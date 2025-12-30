@@ -227,11 +227,7 @@ void handle_send_friend_request(int client_index, char *args)
         send_reply_sock(client->socket_fd, 403, MSG_ALREADY_SENT);
         return;
     }
-    // check if already friend and return 402
-    if (add_friend(client, from_user_id, to_user_id) == -1)
-    {
-        return;
-    }
+    
 
     // Find or create friend request list for target user
     FriendRequestList *list = find_friend_request_list(to_user_id);

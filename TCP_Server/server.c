@@ -428,8 +428,8 @@ int main(int argc, char *argv[])
                     // Client disconnected or error
                     if (ret == 0)
                     {
-                        printf("Client disconnected: socket_fd=%d, user_id=%d\n",
-                               clients[i].socket_fd, clients[i].user_id);
+                        printf("Client disconnected: socket_fd=%d\n",
+                               clients[i].socket_fd);
                         log_activity(i, "DISCONNECT", "Client disconnected normally");
                     } else {
                         log_activity(i, "DISCONNECT", "Connection error");

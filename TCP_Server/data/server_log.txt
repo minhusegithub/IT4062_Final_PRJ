@@ -10,3 +10,73 @@
 [2025-12-29 18:59:10] [127.0.0.1:51808] [nvf(ID:6)] LOGOUT: User logged out
 [2025-12-29 18:59:14] [127.0.0.1:51808] [nva(ID:1)] LOGIN: Login successful
 [2025-12-29 19:00:28] [127.0.0.1:51808] [nva(ID:1)] ADD_LOCATION: Quán xôi xéo
+[2025-12-29 19:16:57] [SYSTEM] Server started
+[2025-12-29 19:17:25] [127.0.0.1:57100] [Guest] CONNECTION: New client connected
+[2025-12-29 19:17:39] [127.0.0.1:57100] [nva(ID:1)] LOGIN: Login successful
+[2025-12-29 19:19:24] [127.0.0.1:57100] [nva(ID:1)] REGISTER: nvg
+[2025-12-29 19:20:05] [127.0.0.1:57100] [nva(ID:1)] LOGOUT: User logged out
+[2025-12-29 19:20:05] [127.0.0.1:57100] [Guest] DISCONNECT: Client disconnected normally
+[2025-12-30 16:51:19] [SYSTEM] Server started
+[2025-12-30 16:51:27] [127.0.0.1:53988] [Guest] CONNECTION: New client connected
+[2025-12-30 16:51:48] [127.0.0.1:53988] [nva(ID:1)] LOGIN: Login successful
+[2025-12-30 17:08:50] [127.0.0.1:53988] [nva(ID:1)] REGISTER: xyz
+[2025-12-30 17:09:42] [127.0.0.1:53988] [nva(ID:1)] LOGOUT: User logged out
+[2025-12-30 17:11:18] [127.0.0.1:53988] [Guest] DISCONNECT: Client disconnected normally
+[2025-12-30 17:13:30] [SYSTEM] Server started
+[2025-12-30 17:13:37] [127.0.0.1:59304] [Guest] CONNECTION: New client connected
+[2025-12-30 17:13:43] [127.0.0.1:59304] [nva(ID:1)] LOGIN: Login successful
+[2025-12-30 17:14:04] [127.0.0.1:59304] [nva(ID:1)] REGISTER: mnp
+[2025-12-30 17:14:17] [127.0.0.1:59304] [nva(ID:1)] LOGOUT: User logged out
+[2025-12-30 17:15:55] [127.0.0.1:59304] [nvb(ID:2)] LOGIN: Login successful
+[2025-12-30 17:16:17] [127.0.0.1:59304] [nvb(ID:2)] LOGOUT: User logged out
+[2025-12-30 17:17:37] [127.0.0.1:59304] [Guest] DISCONNECT: Client disconnected normally
+[2025-12-30 17:17:45] [SYSTEM] Server started
+[2025-12-30 17:17:46] [127.0.0.1:56224] [Guest] CONNECTION: New client connected
+[2025-12-30 17:17:49] [127.0.0.1:56224] [nva(ID:1)] LOGIN: Login successful
+[2025-12-30 17:17:54] [127.0.0.1:56224] [nva(ID:1)] LOGOUT: User logged out
+[2025-12-30 17:18:47] [127.0.0.1:56224] [Guest] DISCONNECT: Client disconnected normally
+[2025-12-30 17:35:45] [SYSTEM] Server started
+[2025-12-30 17:35:45] [127.0.0.1:44078] [Guest] CONNECTION: New client connected
+[2025-12-30 17:35:48] [127.0.0.1:44078] [nva(ID:1)] LOGIN: Login successful
+[2025-12-30 17:37:07] [127.0.0.1:44078] [nva(ID:1)] REGISTER: abc
+[2025-12-30 17:39:10] [127.0.0.1:44078] [nva(ID:1)] LOGOUT: User logged out
+[2025-12-30 17:39:14] [127.0.0.1:44078] [nvb(ID:2)] LOGIN: Login successful
+[2025-12-30 17:39:24] [127.0.0.1:44078] [nvb(ID:2)] LOGOUT: User logged out
+[2025-12-30 17:39:29] [127.0.0.1:44078] [nvc(ID:3)] LOGIN: Login successful
+[2025-12-30 17:40:12] [127.0.0.1:44078] [nvc(ID:3)] SEND_REQUEST: Sent request to: nvb
+[2025-12-30 17:41:04] [127.0.0.1:44078] [nvc(ID:3)] LOGOUT: User logged out
+[2025-12-30 17:41:25] [127.0.0.1:44078] [nvb(ID:2)] LOGIN: Login successful
+[2025-12-30 17:43:36] [127.0.0.1:44078] [nvb(ID:2)] LOGOUT: User logged out
+[2025-12-30 17:43:44] [127.0.0.1:44078] [nvb(ID:2)] LOGIN: Login successful
+[2025-12-30 17:44:07] [SYSTEM] Server started
+[2025-12-30 17:44:09] [127.0.0.1:47168] [Guest] CONNECTION: New client connected
+[2025-12-30 17:44:13] [127.0.0.1:47168] [nvb(ID:2)] LOGIN: Login successful
+[2025-12-30 17:44:26] [127.0.0.1:47168] [nvb(ID:2)] ACCEPT_REQUEST: Accepted UserID: 3
+[2025-12-30 17:45:07] [127.0.0.1:47168] [nvb(ID:2)] LOGOUT: User logged out
+[2025-12-30 17:45:07] [127.0.0.1:47168] [Guest] DISCONNECT: Client disconnected normally
+[2025-12-30 17:45:21] [SYSTEM] Server started
+[2025-12-30 17:45:26] [127.0.0.1:53366] [Guest] CONNECTION: New client connected
+[2025-12-30 17:46:08] [127.0.0.1:53366] [abc(ID:10)] LOGIN: Login successful
+[2025-12-30 17:46:29] [127.0.0.1:53366] [abc(ID:10)] SEND_REQUEST: Sent request to: nva
+[2025-12-30 17:46:41] [127.0.0.1:53366] [abc(ID:10)] LOGOUT: User logged out
+[2025-12-30 17:46:45] [127.0.0.1:53366] [nva(ID:1)] LOGIN: Login successful
+[2025-12-30 18:02:07] [SYSTEM] Server started
+[2025-12-30 18:02:07] [127.0.0.1:35178] [Guest] CONNECTION: New client connected
+[2025-12-30 18:02:10] [127.0.0.1:35178] [nva(ID:1)] LOGIN: Login successful
+[2025-12-30 18:02:19] [127.0.0.1:35178] [nva(ID:1)] ACCEPT_REQUEST: Accepted UserID: 10
+[2025-12-30 18:02:44] [127.0.0.1:35178] [nva(ID:1)] SEND_REQUEST: Sent request to: nve
+[2025-12-30 18:02:56] [127.0.0.1:35178] [nva(ID:1)] LOGOUT: User logged out
+[2025-12-30 18:03:04] [127.0.0.1:35178] [nve(ID:5)] LOGIN: Login successful
+[2025-12-30 18:15:36] [127.0.0.1:35178] [nve(ID:5)] DISCONNECT: Client disconnected normally
+[2025-12-30 18:15:44] [SYSTEM] Server started
+[2025-12-30 18:15:46] [127.0.0.1:47892] [Guest] CONNECTION: New client connected
+[2025-12-30 18:16:10] [127.0.0.1:47892] [mnp(ID:9)] LOGIN: Login successful
+[2025-12-30 18:16:25] [127.0.0.1:47892] [mnp(ID:9)] SEND_REQUEST: Sent request to: nva
+[2025-12-30 18:16:34] [127.0.0.1:47892] [mnp(ID:9)] LOGOUT: User logged out
+[2025-12-30 18:16:40] [127.0.0.1:47892] [nva(ID:1)] LOGIN: Login successful
+[2025-12-30 18:17:14] [127.0.0.1:47892] [nva(ID:1)] ACCEPT_REQUEST: Accepted UserID: 9
+[2025-12-30 18:17:31] [127.0.0.1:47892] [nva(ID:1)] LOGOUT: User logged out
+[2025-12-30 18:18:08] [127.0.0.1:47892] [nve(ID:5)] LOGIN: Login successful
+[2025-12-30 18:18:17] [127.0.0.1:47892] [nve(ID:5)] REJECT_REQUEST: Rejected UserID: 1
+[2025-12-30 18:47:02] [127.0.0.1:47892] [nve(ID:5)] LOGOUT: User logged out
+[2025-12-30 18:47:02] [127.0.0.1:47892] [Guest] DISCONNECT: Client disconnected normally
